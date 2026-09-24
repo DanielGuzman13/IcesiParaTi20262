@@ -1,4 +1,4 @@
-import { kvHIncrBy, kvHGetAll } from './_lib/kv.js';
+import { kvHIncrBy, kvHGetAll } from '../lib/kv.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');

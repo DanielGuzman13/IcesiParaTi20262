@@ -1,4 +1,4 @@
-import { kvLRange } from './_lib/kv.js';
+import { kvLRange } from '../lib/kv.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');

@@ -1,4 +1,4 @@
-import { kvLPush, kvLRange, kvLTrim, kvGet, kvSet, kvSAdd } from './_lib/kv.js';
+import { kvLPush, kvLRange, kvLTrim, kvGet, kvSet, kvSAdd } from '../lib/kv.js';
 
 function slug(s) {
   return (s || '').toString().trim().toLowerCase();

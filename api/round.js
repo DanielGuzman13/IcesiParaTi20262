@@ -1,4 +1,4 @@
-import { kvGet, kvSet, kvSAdd } from './_lib/kv.js';
+import { kvGet, kvSet, kvSAdd } from '../lib/kv.js';
 
 // Cada ronda: la respuesta correcta gana el puntaje completo.
 // Cualquier otra opción válida (A/B/C) todavía da puntaje parcial — nadie se queda en cero.

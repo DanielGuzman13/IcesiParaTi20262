@@ -1,4 +1,4 @@
-import { kvSMembers, kvGet } from './_lib/kv.js';
+import { kvSMembers, kvGet } from '../lib/kv.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
