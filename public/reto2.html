@@ -12,23 +12,32 @@
   body{ margin:0; min-height:100vh; background:var(--bg); color:var(--ink); font-family:'Space Grotesk',sans-serif; display:flex; justify-content:center; padding:28px 18px 60px;}
   .wrap{ width:100%; max-width:440px; }
   h1{ font-size:1.25rem; margin-bottom:6px;}
-  p.sub{ color:var(--muted); font-size:.88rem; margin:0 0 22px; line-height:1.5;}
+  p.sub{ color:var(--muted); font-size:.88rem; margin:0 0 18px; line-height:1.5;}
+  .banner{ font-family:'IBM Plex Mono',monospace; font-size:.75rem; color:var(--teal); margin-bottom:18px;}
   label{ display:block; font-family:'IBM Plex Mono',monospace; font-size:.72rem; color:var(--teal); margin:16px 0 6px;}
   input{ width:100%; padding:11px 13px; border-radius:10px; background:var(--card); border:1px solid var(--card-border); color:var(--ink); font-family:'Space Grotesk',sans-serif; font-size:.92rem; }
   button{ margin-top:20px; width:100%; padding:14px; border-radius:10px; border:none; background:var(--teal); color:#062019; font-weight:700; font-size:.95rem; cursor:pointer; }
   button:disabled{ opacity:.6; }
   .result{ display:none; margin-top:22px; padding:20px; border-radius:14px; background:var(--card); border:1px solid rgba(94,234,212,.35); text-align:center;}
   .err{ color:#f2705e; font-size:.82rem; margin-top:10px; min-height:1em;}
+  .need-avatar{ display:none; text-align:center; padding:30px 20px; background:var(--card); border:1px solid var(--card-border); border-radius:14px;}
+  .need-avatar p{ color:var(--muted); font-size:.88rem; line-height:1.5;}
+  .need-avatar a{ display:inline-block; margin-top:14px; padding:12px 22px; background:var(--teal); color:#062019; border-radius:10px; text-decoration:none; font-weight:700; font-size:.9rem;}
 </style>
 </head>
 <body>
+<a href="/" style="position:fixed;top:14px;left:14px;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--muted);text-decoration:none;border:1px solid var(--card-border);padding:6px 10px;border-radius:8px;background:var(--card);z-index:50;">← Inicio</a>
 <div class="wrap">
   <h1>💻 Reto 2: Código Corrupto</h1>
   <p class="sub">Mira el código que muestra el presentador. ¿Cuál opción describe el bug?</p>
+  <div class="banner" id="banner"></div>
+
+  <div class="need-avatar" id="needAvatar">
+    <p>Primero necesitas crear tu avatar para que el sistema te reconozca en esta actividad.</p>
+    <a href="/avatar-form.html">Crear mi avatar</a>
+  </div>
 
   <div id="formArea">
-    <label>Tu nombre</label>
-    <input id="personName" type="text" placeholder="El mismo que usaste en tu avatar">
     <label>Respuesta</label>
     <input id="answer" type="text" placeholder="Escribe A, B o C">
     <button id="sendBtn">Enviar respuesta</button>
@@ -41,12 +50,19 @@
 </div>
 
 <script>
+  const personName = (function(){ try{ return localStorage.getItem('icesiPersonName') || ''; }catch(e){ return ''; } })();
+  if (!personName){
+    document.getElementById('formArea').style.display = 'none';
+    document.getElementById('needAvatar').style.display = 'block';
+  } else {
+    document.getElementById('banner').textContent = 'Conectado como: ' + personName;
+  }
+
   const sendBtn = document.getElementById('sendBtn');
   const err = document.getElementById('err');
   sendBtn.addEventListener('click', async () => {
-    const personName = document.getElementById('personName').value.trim();
     const answer = document.getElementById('answer').value.trim();
-    if (!personName || !answer){ err.textContent = 'Completa los dos campos.'; return; }
+    if (!answer){ err.textContent = 'Escribe una respuesta.'; return; }
     err.textContent = '';
     sendBtn.disabled = true; sendBtn.textContent = 'Enviando...';
     try{

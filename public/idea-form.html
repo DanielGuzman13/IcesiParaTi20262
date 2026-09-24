@@ -4,30 +4,60 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Reto Arquitecto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root{ --bg:#0a1120; --card:#101a2e; --card-border:rgba(148,180,230,.16); --ink:#eef2fb; --muted:#8090ac; --teal:#5eead4; }
+  :root{ --bg:#0a1120; --card:#101a2e; --card-border:rgba(148,180,230,.16); --ink:#eef2fb; --muted:#8090ac; --teal:#5eead4; --amber:#f2b544; }
   *{box-sizing:border-box;}
   body{ margin:0; min-height:100vh; background:var(--bg); color:var(--ink); font-family:'Space Grotesk',sans-serif; display:flex; justify-content:center; padding:28px 18px 60px;}
-  .wrap{ width:100%; max-width:440px; }
-  h1{ font-size:1.25rem; margin-bottom:6px;}
-  p.sub{ color:var(--muted); font-size:.88rem; margin:0 0 22px; line-height:1.5;}
+  .wrap{ width:100%; max-width:460px; }
+  h1{ font-size:1.25rem; margin-bottom:10px;}
+  .case{ background:var(--card); border:1px solid var(--card-border); border-radius:14px; padding:18px 20px; margin-bottom:22px; }
+  .case .tag{ font-family:'IBM Plex Mono',monospace; font-size:.68rem; color:var(--amber); letter-spacing:.05em; }
+  .case h2{ font-size:1.02rem; margin:6px 0 10px; }
+  .case p{ font-size:.85rem; color:#dbe3f5; line-height:1.55; margin:0 0 10px; }
+  .case ul{ margin:0 0 10px; padding-left:18px; font-size:.83rem; color:#dbe3f5; line-height:1.6; }
+  .case .constraint{ font-family:'IBM Plex Mono',monospace; font-size:.72rem; color:var(--muted); border-top:1px solid var(--card-border); padding-top:10px; margin-top:10px;}
+  .banner{ font-family:'IBM Plex Mono',monospace; font-size:.75rem; color:var(--teal); margin-bottom:14px;}
   label{ display:block; font-family:'IBM Plex Mono',monospace; font-size:.72rem; color:var(--teal); margin:16px 0 6px;}
-  input, textarea{ width:100%; padding:11px 13px; border-radius:10px; background:var(--card); border:1px solid var(--card-border); color:var(--ink); font-family:'Space Grotesk',sans-serif; font-size:.92rem; }
-  textarea{ min-height:110px; resize:vertical; }
+  textarea{ width:100%; padding:11px 13px; border-radius:10px; background:var(--card); border:1px solid var(--card-border); color:var(--ink); font-family:'Space Grotesk',sans-serif; font-size:.92rem; min-height:120px; resize:vertical;}
   button{ margin-top:20px; width:100%; padding:14px; border-radius:10px; border:none; background:var(--teal); color:#062019; font-weight:700; font-size:.95rem; cursor:pointer; }
   .result{ display:none; margin-top:22px; padding:20px; border-radius:14px; background:var(--card); border:1px solid rgba(94,234,212,.35); text-align:center;}
   .err{ color:#f2705e; font-size:.82rem; margin-top:10px; min-height:1em;}
+  .need-avatar{ display:none; text-align:center; padding:30px 20px; background:var(--card); border:1px solid var(--card-border); border-radius:14px;}
+  .need-avatar p{ color:var(--muted); font-size:.88rem; line-height:1.5;}
+  .need-avatar a{ display:inline-block; margin-top:14px; padding:12px 22px; background:var(--teal); color:#062019; border-radius:10px; text-decoration:none; font-weight:700; font-size:.9rem;}
 </style>
 </head>
 <body>
+<a href="/" style="position:fixed;top:14px;left:14px;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--muted);text-decoration:none;border:1px solid var(--card-border);padding:6px 10px;border-radius:8px;background:var(--card);z-index:50;">← Inicio</a>
 <div class="wrap">
   <h1>💡 Reto Arquitecto: Diseña la Solución</h1>
-  <p class="sub">Escribe, con tus propias palabras, cómo tu equipo resolvería el problema que planteó el presentador.</p>
+
+  <div class="case">
+    <span class="tag">CASO DE ESTUDIO</span>
+    <h2>El caos de salida del Colegio San Rafael</h2>
+    <p>El Colegio San Rafael tiene 1.200 estudiantes y una sola entrada/salida principal. Todos los días a las 3:00 p.m., ese punto se vuelve un cuello de botella: buses del colegio, carros de los papás, estudiantes que caminan a la parada, y profesores tratando de organizar todo al mismo tiempo, en el mismo espacio.</p>
+    <p><b>Lo que reportan los involucrados:</b></p>
+    <ul>
+      <li>Papás esperan hasta 20 minutos en el carro sin saber si su hijo(a) ya salió.</li>
+      <li>Los buses a veces salen sin completar cupo porque no saben cuántos estudiantes van en cada ruta.</li>
+      <li>Ha habido 2 casi-accidentes este semestre por la mezcla de carros y estudiantes caminando.</li>
+      <li>Los profesores de turno de salida terminan exhaustos, coordinando todo a punta de silbato y radio.</li>
+    </ul>
+    <p><b>El reto:</b> el colegio los contrató (a ustedes) para proponer, en sus propias palabras, una solución con tecnología. No tiene que ser complicada — puede usar el celular, sensores simples, una app, notificaciones, lo que se les ocurra.</p>
+    <div class="constraint">Restricciones reales: presupuesto limitado (no pueden construir una entrada nueva), tiene que funcionar con la infraestructura actual, y debe estar lista para el próximo semestre.</div>
+  </div>
+
+  <div class="banner" id="banner"></div>
+
+  <div class="need-avatar" id="needAvatar">
+    <p>Primero necesitas crear tu avatar para que el sistema te reconozca en esta actividad.</p>
+    <a href="/avatar-form.html">Crear mi avatar</a>
+  </div>
+
   <div id="formArea">
-    <label>Tu nombre</label>
-    <input id="personName" type="text" placeholder="El mismo que usaste en tu avatar">
-    <label>Propuesta</label>
+    <label>Tu propuesta</label>
     <textarea id="text" placeholder="Ej: usaríamos sensores en la puerta que avisan por app cuando ya hay mucha gente..."></textarea>
     <button id="sendBtn">Enviar propuesta</button>
     <div class="err" id="err"></div>
@@ -35,11 +65,18 @@
   <div class="result" id="result">¡Propuesta enviada! 💡 Ya va camino al muro de ideas.</div>
 </div>
 <script>
+  const personName = (function(){ try{ return localStorage.getItem('icesiPersonName') || ''; }catch(e){ return ''; } })();
+  if (!personName){
+    document.getElementById('formArea').style.display = 'none';
+    document.getElementById('needAvatar').style.display = 'block';
+  } else {
+    document.getElementById('banner').textContent = 'Conectado como: ' + personName;
+  }
+
   document.getElementById('sendBtn').addEventListener('click', async () => {
-    const personName = document.getElementById('personName').value.trim();
     const text = document.getElementById('text').value.trim();
     const err = document.getElementById('err');
-    if (!personName || !text){ err.textContent = 'Completa los dos campos.'; return; }
+    if (!text){ err.textContent = 'Escribe tu propuesta.'; return; }
     err.textContent = '';
     try{
       const res = await fetch('/api/ideas', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name: personName, text }) });

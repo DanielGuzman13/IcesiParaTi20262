@@ -24,6 +24,7 @@
 </style>
 </head>
 <body>
+<a href="/" style="position:fixed;top:14px;left:14px;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--muted);text-decoration:none;border:1px solid var(--card-border);padding:6px 10px;border-radius:8px;background:var(--card);z-index:50;">← Inicio</a>
 <div class="wrap">
   <h1>🧑‍💻 Crea tu Avatar de Ingeniero</h1>
   <p class="sub">Describe cómo se ve un ingeniero(a) de sistemas del futuro.</p>
@@ -46,6 +47,13 @@
 </div>
 
 <script>
+  try{
+    const savedName = localStorage.getItem('icesiPersonName');
+    const savedTeam = localStorage.getItem('icesiTeam');
+    if (savedName) document.getElementById('personName').value = savedName;
+    if (savedTeam) document.getElementById('team').value = savedTeam;
+  }catch(e){}
+
   const sendBtn = document.getElementById('sendBtn');
   const err = document.getElementById('err');
   sendBtn.addEventListener('click', async () => {
@@ -59,6 +67,7 @@
       const res = await fetch('/api/avatar', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name: personName, team, description }) });
       const data = await res.json();
       if (!data.ok) throw new Error(data.error || 'Error');
+      try{ localStorage.setItem('icesiPersonName', personName); localStorage.setItem('icesiTeam', team); }catch(e){}
       document.getElementById('formArea').style.display = 'none';
       document.getElementById('result').style.display = 'block';
       document.getElementById('resultImg').src = data.entry.imageUrl;

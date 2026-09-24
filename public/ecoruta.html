@@ -88,6 +88,7 @@
 </style>
 </head>
 <body>
+<a href="/" style="position:fixed;top:14px;left:14px;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--muted);text-decoration:none;border:1px solid var(--card-border);padding:6px 10px;border-radius:8px;background:var(--card);z-index:50;">← Inicio</a>
 <div class="wrap">
 
   <div id="intro" class="intro">
@@ -129,8 +130,7 @@
       <div class="stat"><div class="n" id="finalScore">0</div><div class="l">puntos</div></div>
     </div>
     <div id="submitArea">
-      <p class="hint">Escribe tu nombre (el mismo que usaste en tu avatar) para registrar tu resultado en el marcador general:</p>
-      <input id="teamInput" type="text" placeholder="Tu nombre" style="width:100%;padding:12px 14px;border-radius:10px;background:var(--card);border:1px solid var(--card-border);color:var(--ink);font-family:inherit;font-size:.92rem;">
+      <p class="hint" id="identityLine"></p>
       <button class="start-btn" id="submitBtn" style="margin-top:14px;">Enviar resultado</button>
       <p class="hint" id="submitMsg"></p>
     </div>
@@ -422,6 +422,8 @@
     }
   });
 
+  const personName = (function(){ try{ return localStorage.getItem('icesiPersonName') || ''; }catch(e){ return ''; } })();
+
   function showEnding(){
     gameEl.style.display = 'none';
     endingEl.style.display = 'block';
@@ -430,12 +432,12 @@
     document.getElementById('profileName').textContent = profile.name;
     document.getElementById('profileDesc').textContent = profile.desc;
     document.getElementById('finalScore').textContent = score;
+    document.getElementById('identityLine').textContent = personName ? ('Conectado como: ' + personName) : 'Primero crea tu avatar en /avatar-form.html para poder enviar tu resultado.';
   }
 
   document.getElementById('submitBtn').addEventListener('click', async () => {
-    const personName = document.getElementById('teamInput').value.trim();
     const msg = document.getElementById('submitMsg');
-    if (!personName){ msg.textContent = 'Escribe tu nombre.'; return; }
+    if (!personName){ msg.textContent = 'Primero crea tu avatar en /avatar-form.html'; return; }
     msg.textContent = 'Enviando...';
     try{
       const res = await fetch('/api/round', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name: personName, round:'ecoruta', points: score }) });
