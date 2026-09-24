@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Terminal — Votación en Vivo</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#050a08; --card:#0a130f; --card-border:rgba(94,234,212,.22); --ink:#dffaf0; --muted:#6f9284; --teal:#5eead4; --amber:#f2b544;}
+  *{box-sizing:border-box;}
+  body{ margin:0; min-height:100vh; background:var(--bg); color:var(--ink); font-family:'IBM Plex Mono',monospace; }
+  header{ padding:20px 32px; border-bottom:1px solid var(--card-border); display:flex; justify-content:space-between; align-items:center;}
+  h1{ font-family:'Space Grotesk',sans-serif; font-size:1.4rem; margin:0;}
+  main{ padding:28px 32px; max-width:700px; margin:0 auto;}
+  .stage{ display:flex; gap:10px; align-items:center; margin-bottom:22px;}
+  .stage input{ width:70px; padding:7px 9px; border-radius:6px; background:var(--card); border:1px solid var(--card-border); color:var(--ink); text-align:center; font-family:inherit;}
+  .barrow{ margin-bottom:16px; }
+  .label{ display:flex; justify-content:space-between; font-size:.85rem; margin-bottom:6px;}
+  .opt{ font-family:'Space Grotesk',sans-serif; font-weight:700;}
+  .track{ height:26px; background:var(--card); border:1px solid var(--card-border); border-radius:6px; overflow:hidden;}
+  .fill{ height:100%; background:linear-gradient(90deg,var(--teal),#2fa88f); transition:width .5s ease;}
+  .leading .fill{ background:linear-gradient(90deg,var(--amber),#c98a1f);}
+  .empty{ color:var(--muted); text-align:center; margin-top:10vh;}
+</style>
+</head>
+<body>
+<header><h1>Terminal — Votación en Vivo</h1></header>
+<main>
+  <div class="stage"><span>&gt; Etapa:</span><input id="etapa" value="1"></div>
+  <div class="empty" id="empty">Sin votos todavía…</div>
+  <div id="bars"></div>
+</main>
+<script>
+  function esc(s){ const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+  async function poll(){
+    const etapa = document.getElementById('etapa').value.trim();
+    if (!etapa) return;
+    try{
+      const res = await fetch('/api/terminal?etapa=' + encodeURIComponent(etapa));
+      const data = await res.json();
+      const votes = data.votes || {};
+      const entries = Object.entries(votes);
+      document.getElementById('empty').style.display = entries.length ? 'none' : 'block';
+      const max = Math.max(...entries.map(([,v])=>v), 1);
+      entries.sort((a,b)=>b[1]-a[1]);
+      document.getElementById('bars').innerHTML = entries.map(([opt,count]) => `
+        <div class="barrow ${count===max&&max>0?'leading':''}">
+          <div class="label"><span class="opt">Opción ${esc(opt)}</span><span>${count} voto(s)</span></div>
+          <div class="track"><div class="fill" style="width:${Math.max(4,count/max*100)}%"></div></div>
+        </div>`).join('');
+    }catch(e){}
+  }
+  poll(); setInterval(poll, 8000);
+  document.getElementById('etapa').addEventListener('change', poll);
+</script>
+</body>
+</html>

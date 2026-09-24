@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Terminal de Rescate</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#050a08; --card:#0a130f; --card-border:rgba(94,234,212,.22); --ink:#dffaf0; --muted:#6f9284; --teal:#5eead4; }
+  *{box-sizing:border-box;}
+  body{ margin:0; min-height:100vh; background:var(--bg); color:var(--ink); font-family:'IBM Plex Mono',monospace; display:flex; justify-content:center; padding:30px 18px 60px;}
+  .wrap{ width:100%; max-width:420px; }
+  h1{ font-family:'Space Grotesk',sans-serif; font-size:1.2rem; margin-bottom:6px;}
+  p.sub{ color:var(--muted); font-size:.85rem; line-height:1.5; margin:0 0 20px;}
+  label{ display:block; font-size:.7rem; color:var(--teal); margin:14px 0 6px;}
+  input{ width:100%; padding:10px 12px; border-radius:6px; background:var(--card); border:1px solid var(--card-border); color:var(--ink); font-family:inherit; font-size:.9rem;}
+  button{ margin-top:18px; width:100%; padding:13px; border-radius:8px; border:none; background:var(--teal); color:#03100c; font-weight:700; font-size:.9rem; cursor:pointer; font-family:'Space Grotesk',sans-serif;}
+  .result{ display:none; margin-top:20px; padding:18px; border-radius:10px; background:var(--card); border:1px solid var(--card-border); text-align:center;}
+  .err{ color:#f2705e; font-size:.8rem; margin-top:8px; min-height:1em;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📡 Terminal de Rescate</h1>
+  <p class="sub">Escribe el número de etapa que está en pantalla y la letra del comando que tu equipo quiere ejecutar.</p>
+  <div id="formArea">
+    <label>Etapa</label>
+    <input id="etapa" type="text" placeholder="Ej: 1">
+    <label>Opción</label>
+    <input id="opcion" type="text" placeholder="Escribe A, B o C">
+    <button id="sendBtn">Votar comando</button>
+    <div class="err" id="err"></div>
+  </div>
+  <div class="result" id="result">Voto registrado 📡</div>
+</div>
+<script>
+  document.getElementById('sendBtn').addEventListener('click', async () => {
+    const etapa = document.getElementById('etapa').value.trim();
+    const opcion = document.getElementById('opcion').value.trim();
+    const err = document.getElementById('err');
+    if (!etapa || !opcion){ err.textContent = 'Completa los dos campos.'; return; }
+    err.textContent = '';
+    try{
+      const res = await fetch('/api/terminal', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ etapa, opcion }) });
+      const data = await res.json();
+      if (!data.ok) throw new Error();
+      document.getElementById('formArea').style.display='none';
+      document.getElementById('result').style.display='block';
+    }catch(e){ err.textContent = 'No se pudo enviar. Intenta de nuevo.'; }
+  });
+</script>
+</body>
+</html>

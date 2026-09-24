@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Arma el Pipeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a1120; --bg-2:#0d1526; --line:rgba(120,160,220,0.14);
+    --card:#101a2e; --card-border:rgba(148,180,230,0.16);
+    --ink:#eef2fb; --muted:#8090ac; --teal:#5eead4; --amber:#f2b544;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){ --bg:#0a1120; --ink:#eef2fb; }
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0; min-height:100%;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px) 0 0/40px 40px,
+      linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0/40px 40px,
+      var(--bg);
+    color:var(--ink); font-family:'Space Grotesk', system-ui, sans-serif;
+    display:flex; justify-content:center;
+  }
+  .wrap{ width:100%; max-width:480px; padding:28px 18px 48px; }
+  .tag{ font-family:'IBM Plex Mono', monospace; font-size:.72rem; letter-spacing:.08em; color:var(--teal); }
+  h1{ margin:6px 0 6px; font-size:1.4rem; font-weight:700; }
+  p.sub{ color:var(--muted); font-size:.88rem; line-height:1.5; margin:0 0 20px; }
+
+  .list{ display:flex; flex-direction:column; gap:10px; margin-bottom:20px; }
+  .block{
+    background:var(--card); border:1px solid var(--card-border); border-radius:12px;
+    padding:14px 14px; display:flex; align-items:center; gap:12px;
+    transition: transform .25s ease, box-shadow .25s ease;
+  }
+  .block .pos{
+    font-family:'IBM Plex Mono', monospace; font-size:.75rem; color:var(--amber);
+    width:22px; text-align:center; flex-shrink:0;
+  }
+  .block .icon{ font-size:1.3rem; flex-shrink:0; }
+  .block .txt{ flex:1; min-width:0; }
+  .block .txt .name{ font-weight:600; font-size:.95rem; }
+  .block .txt .desc{ color:var(--muted); font-size:.76rem; margin-top:1px; }
+  .block .btns{ display:flex; flex-direction:column; gap:4px; }
+  .block .btns button{
+    width:32px; height:26px; border-radius:6px; border:1px solid var(--card-border);
+    background:var(--bg-2); color:var(--ink); font-size:.8rem; cursor:pointer;
+  }
+  .block .btns button:disabled{ opacity:.25; cursor:default; }
+  .block.correct-pos{ box-shadow: 0 0 0 1px rgba(94,234,212,.4); }
+
+  button.check{
+    width:100%; padding:13px; border-radius:10px; border:none; background:var(--teal);
+    color:#062019; font-weight:700; font-size:.98rem; cursor:pointer;
+  }
+
+  .result{
+    margin-top:20px; padding:20px; border-radius:14px; text-align:center;
+    border:1px solid var(--card-border); background:var(--card); display:none;
+  }
+  .result.ok{ border-color: rgba(94,234,212,.5); }
+  .result.fail{ border-color: rgba(242,112,94,.4); }
+  .result h2{ margin:0 0 8px; font-size:1.1rem; }
+  .result p{ margin:0; color:var(--muted); font-size:.85rem; }
+  .code{
+    font-family:'IBM Plex Mono', monospace; font-size:1.4rem; letter-spacing:.06em;
+    color:var(--amber); background:var(--bg-2); border:1px dashed rgba(242,181,68,.4);
+    border-radius:10px; padding:12px; margin:14px 0; user-select:all;
+  }
+  .hint{ color:var(--muted); font-size:.78rem; margin-top:14px; font-family:'IBM Plex Mono', monospace; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="tag">RETO PIPELINE</span>
+  <h1>Arma el Sistema</h1>
+  <p class="sub">Este es el mismo flujo que usaste para crear tu avatar, pero desordenado. Usa las flechas ▲▼ para dejarlo en el orden correcto.</p>
+
+  <div class="list" id="list"></div>
+
+  <button class="check" id="checkBtn">Verificar orden</button>
+
+  <div class="result" id="result">
+    <h2 id="resultTitle"></h2>
+    <p id="resultText"></p>
+    <div id="submitArea" style="display:none;">
+      <input id="teamInput" type="text" placeholder="Tu nombre (el mismo de tu avatar)" style="width:100%;padding:11px 13px;border-radius:10px;background:var(--bg-2);border:1px solid var(--card-border);color:var(--ink);font-family:inherit;font-size:.9rem;margin-top:10px;">
+      <button class="check" id="submitBtn" style="margin-top:10px;">Enviar resultado</button>
+      <p class="hint" id="submitMsg" style="margin-top:10px;"></p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const CORRECT_ORDER = ['trigger', 'code', 'save', 'show'];
+  const BLOCKS = {
+    trigger: { icon: '📋', name: 'Disparador', desc: 'El equipo llena el formulario' },
+    code:    { icon: '🧠', name: 'Código', desc: 'Se arma el prompt para la IA' },
+    save:    { icon: '💾', name: 'Guardar', desc: 'Se guarda el resultado en memoria' },
+    show:    { icon: '🖥️', name: 'Mostrar', desc: 'Aparece en la pantalla principal' },
+  };
+  const SUCCESS_CODE = 'PIPELINE-OK';
+
+  let order = ['code', 'show', 'trigger', 'save']; // desordenado a propósito
+
+  const listEl = document.getElementById('list');
+  const resultEl = document.getElementById('result');
+  const resultTitle = document.getElementById('resultTitle');
+  const resultText = document.getElementById('resultText');
+  const codeBox = document.getElementById('codeBox');
+
+  function render(){
+    listEl.innerHTML = '';
+    order.forEach((key, i) => {
+      const b = BLOCKS[key];
+      const div = document.createElement('div');
+      div.className = 'block';
+      div.innerHTML = `
+        <div class="pos">${i + 1}</div>
+        <div class="icon">${b.icon}</div>
+        <div class="txt">
+          <div class="name">${b.name}</div>
+          <div class="desc">${b.desc}</div>
+        </div>
+        <div class="btns">
+          <button data-dir="up" data-i="${i}" ${i === 0 ? 'disabled' : ''}>▲</button>
+          <button data-dir="down" data-i="${i}" ${i === order.length - 1 ? 'disabled' : ''}>▼</button>
+        </div>
+      `;
+      listEl.appendChild(div);
+    });
+  }
+
+  listEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const i = parseInt(btn.dataset.i, 10);
+    const dir = btn.dataset.dir;
+    const j = dir === 'up' ? i - 1 : i + 1;
+    if (j < 0 || j >= order.length) return;
+    [order[i], order[j]] = [order[j], order[i]];
+    render();
+  });
+
+  document.getElementById('checkBtn').addEventListener('click', () => {
+    const isCorrect = order.every((k, i) => k === CORRECT_ORDER[i]);
+    resultEl.style.display = 'block';
+    resultEl.className = 'result ' + (isCorrect ? 'ok' : 'fail');
+    if (isCorrect){
+      resultTitle.textContent = '¡Sistema reparado! ✅';
+      resultText.textContent = 'Ese es el orden correcto.';
+      document.getElementById('submitArea').style.display = 'block';
+    } else {
+      resultTitle.textContent = 'Todavía no 🔧';
+      resultText.textContent = 'El orden no es el correcto. Piensa: ¿qué tiene que pasar primero para que exista algo que mostrar al final?';
+      document.getElementById('submitArea').style.display = 'none';
+    }
+  });
+
+  document.getElementById('submitBtn').addEventListener('click', async () => {
+    const personName = document.getElementById('teamInput').value.trim();
+    const msg = document.getElementById('submitMsg');
+    if (!personName){ msg.textContent = 'Escribe tu nombre.'; return; }
+    msg.textContent = 'Enviando...';
+    try{
+      const res = await fetch('/api/round', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name: personName, round:'pipeline', answer: SUCCESS_CODE }) });
+      const data = await res.json();
+      if (!data.ok) throw new Error();
+      msg.textContent = '¡Registrado! Revisa el marcador en pantalla.';
+      document.getElementById('submitBtn').disabled = true;
+    }catch(e){ msg.textContent = 'No se pudo enviar, intenta de nuevo.'; }
+  });
+
+  render();
+</script>
+</body>
+</html>

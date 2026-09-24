@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Reto Arquitecto</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#0a1120; --card:#101a2e; --card-border:rgba(148,180,230,.16); --ink:#eef2fb; --muted:#8090ac; --teal:#5eead4; }
+  *{box-sizing:border-box;}
+  body{ margin:0; min-height:100vh; background:var(--bg); color:var(--ink); font-family:'Space Grotesk',sans-serif; display:flex; justify-content:center; padding:28px 18px 60px;}
+  .wrap{ width:100%; max-width:440px; }
+  h1{ font-size:1.25rem; margin-bottom:6px;}
+  p.sub{ color:var(--muted); font-size:.88rem; margin:0 0 22px; line-height:1.5;}
+  label{ display:block; font-family:'IBM Plex Mono',monospace; font-size:.72rem; color:var(--teal); margin:16px 0 6px;}
+  input, textarea{ width:100%; padding:11px 13px; border-radius:10px; background:var(--card); border:1px solid var(--card-border); color:var(--ink); font-family:'Space Grotesk',sans-serif; font-size:.92rem; }
+  textarea{ min-height:110px; resize:vertical; }
+  button{ margin-top:20px; width:100%; padding:14px; border-radius:10px; border:none; background:var(--teal); color:#062019; font-weight:700; font-size:.95rem; cursor:pointer; }
+  .result{ display:none; margin-top:22px; padding:20px; border-radius:14px; background:var(--card); border:1px solid rgba(94,234,212,.35); text-align:center;}
+  .err{ color:#f2705e; font-size:.82rem; margin-top:10px; min-height:1em;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>💡 Reto Arquitecto: Diseña la Solución</h1>
+  <p class="sub">Escribe, con tus propias palabras, cómo tu equipo resolvería el problema que planteó el presentador.</p>
+  <div id="formArea">
+    <label>Tu nombre</label>
+    <input id="personName" type="text" placeholder="El mismo que usaste en tu avatar">
+    <label>Propuesta</label>
+    <textarea id="text" placeholder="Ej: usaríamos sensores en la puerta que avisan por app cuando ya hay mucha gente..."></textarea>
+    <button id="sendBtn">Enviar propuesta</button>
+    <div class="err" id="err"></div>
+  </div>
+  <div class="result" id="result">¡Propuesta enviada! 💡 Ya va camino al muro de ideas.</div>
+</div>
+<script>
+  document.getElementById('sendBtn').addEventListener('click', async () => {
+    const personName = document.getElementById('personName').value.trim();
+    const text = document.getElementById('text').value.trim();
+    const err = document.getElementById('err');
+    if (!personName || !text){ err.textContent = 'Completa los dos campos.'; return; }
+    err.textContent = '';
+    try{
+      const res = await fetch('/api/ideas', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name: personName, text }) });
+      const data = await res.json();
+      if (!data.ok) throw new Error();
+      document.getElementById('formArea').style.display='none';
+      document.getElementById('result').style.display='block';
+    }catch(e){ err.textContent = 'No se pudo enviar. Intenta de nuevo.'; }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Marcador General</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#0a1120; --line:rgba(120,160,220,.14); --card:#101a2e; --card-border:rgba(148,180,230,.16); --ink:#eef2fb; --muted:#8090ac; --teal:#5eead4; --amber:#f2b544; --red:#f2705e; }
+  *{box-sizing:border-box;}
+  body{ margin:0; min-height:100vh; background:linear-gradient(var(--line) 1px,transparent 1px) 0 0/48px 48px, linear-gradient(90deg,var(--line) 1px,transparent 1px) 0 0/48px 48px, var(--bg); color:var(--ink); font-family:'Space Grotesk',sans-serif; }
+  header{ display:flex; justify-content:space-between; align-items:center; padding:22px 32px; border-bottom:1px solid var(--card-border);}
+  .tag{ font-family:'IBM Plex Mono',monospace; font-size:.72rem; letter-spacing:.08em; color:var(--red);}
+  h1{ margin:4px 0 0; font-size:1.5rem;}
+  .status{ font-family:'IBM Plex Mono',monospace; font-size:.8rem; color:var(--muted); display:flex; align-items:center; gap:8px;}
+  .dot{ width:8px;height:8px;border-radius:50%;background:var(--teal); box-shadow:0 0 8px var(--teal);}
+  .dot.stale{ background:var(--amber);}
+  main{ padding:28px 32px; max-width:1000px; margin:0 auto;}
+  .row{ display:grid; grid-template-columns:56px 44px 1fr auto; gap:14px; align-items:center; background:var(--card); border:1px solid var(--card-border); border-radius:12px; padding:12px 20px; margin-bottom:12px; position:relative; overflow:hidden;}
+  .row.top1{ border-color: rgba(242,181,68,.5);}
+  .rank{ font-family:'IBM Plex Mono',monospace; font-size:1.3rem; color:var(--muted); text-align:center;}
+  .row.top1 .rank{ color:var(--amber);}
+  .avatar{ width:44px; height:44px; border-radius:10px; object-fit:cover; background:#0d1526; border:1px solid var(--card-border);}
+  .avatar.placeholder{ display:flex; align-items:center; justify-content:center; font-size:1.2rem; color:var(--muted);}
+  .name{ font-weight:600; font-size:1.02rem;}
+  .team{ font-family:'IBM Plex Mono',monospace; font-size:.7rem; color:var(--muted); margin-top:1px;}
+  .rounds{ display:flex; gap:6px; margin-top:6px; flex-wrap:wrap;}
+  .chip{ font-family:'IBM Plex Mono',monospace; font-size:.64rem; padding:2px 7px; border-radius:5px; border:1px solid var(--card-border); color:var(--muted);}
+  .chip.hit{ color:#062019; background:var(--teal); border-color:var(--teal); font-weight:600;}
+  .score{ font-family:'IBM Plex Mono',monospace; font-size:1.4rem; font-weight:600;}
+  .row.top1 .score{ color:var(--amber);}
+  .bar{ position:absolute; left:0; bottom:0; height:3px; background:linear-gradient(90deg,var(--teal),transparent);}
+  .empty{ text-align:center; color:var(--muted); margin-top:15vh;}
+</style>
+</head>
+<body>
+<header><div><span class="tag">PROTOCOLO RESCATE · TODAS LAS ACTIVIDADES</span><h1>Marcador en Vivo</h1></div><div class="status"><span class="dot" id="dot"></span><span id="statusText">en vivo</span></div></header>
+<main>
+  <div class="empty" id="empty">Esperando las primeras respuestas…</div>
+  <div id="board"></div>
+</main>
+<script>
+  function esc(s){ const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+  function chip(l,v){ const hit=v>0; return `<span class="chip ${hit?'hit':''}">${l}${hit?' '+v:''}</span>`; }
+  async function poll(){
+    try{
+      const res = await fetch('/api/leaderboard');
+      const data = await res.json();
+      const people = data.people || [];
+      document.getElementById('empty').style.display = people.length ? 'none' : 'block';
+      const max = Math.max(...people.map(p=>p.total),1);
+      document.getElementById('board').innerHTML = people.map((p,i) => `
+        <div class="row ${i===0?'top1':''}">
+          <div class="rank">#${i+1}</div>
+          ${p.avatarUrl ? `<img class="avatar" src="${p.avatarUrl}">` : `<div class="avatar placeholder">🙂</div>`}
+          <div>
+            <div class="name">${esc(p.name)}</div>
+            ${p.team ? `<div class="team">${esc(p.team)}</div>` : ''}
+            <div class="rounds">${chip('R1',p.r1)}${chip('R2',p.r2)}${chip('R3',p.r3)}${chip('Bonus',p.bonus)}${chip('Pipeline',p.pipeline)}${chip('EcoRuta',p.ecoruta)}</div>
+          </div>
+          <div class="score">${p.total} pts</div>
+          <div class="bar" style="width:${Math.max(4,p.total/max*100)}%"></div>
+        </div>
+      `).join('');
+      document.getElementById('dot').classList.remove('stale');
+      document.getElementById('statusText').textContent = 'en vivo';
+    }catch(e){
+      document.getElementById('dot').classList.add('stale');
+      document.getElementById('statusText').textContent = 'sin conexión...';
+    }
+  }
+  poll(); setInterval(poll, 8000);
+</script>
+</body>
+</html>

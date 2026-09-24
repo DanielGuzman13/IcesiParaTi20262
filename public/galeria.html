@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Galería de Avatares</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#0a1120; --line:rgba(120,160,220,.14); --card:#101a2e; --card-border:rgba(148,180,230,.14); --ink:#eef2fb; --muted:#8090ac; --teal:#5eead4; --amber:#f2b544; }
+  *{box-sizing:border-box;}
+  body{ margin:0; min-height:100vh; background:linear-gradient(var(--line) 1px,transparent 1px) 0 0/48px 48px, linear-gradient(90deg,var(--line) 1px,transparent 1px) 0 0/48px 48px, var(--bg); color:var(--ink); font-family:'Space Grotesk',sans-serif; }
+  header{ display:flex; justify-content:space-between; align-items:center; padding:20px 32px; border-bottom:1px solid var(--card-border);}
+  h1{ font-size:1.4rem; margin:0; }
+  .status{ font-family:'IBM Plex Mono',monospace; font-size:.8rem; color:var(--muted); display:flex; align-items:center; gap:8px;}
+  .dot{ width:8px;height:8px;border-radius:50%;background:var(--teal); box-shadow:0 0 8px var(--teal);}
+  .dot.stale{ background:var(--amber);}
+  main{ padding:28px 32px; }
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:18px; }
+  .card{ background:var(--card); border:1px solid var(--card-border); border-radius:14px; overflow:hidden; }
+  .card img{ width:100%; aspect-ratio:1/1; object-fit:cover; display:block; }
+  .card .meta{ padding:12px 14px; }
+  .card .team{ font-weight:600; font-size:.9rem;}
+  .card .desc{ font-size:.76rem; color:var(--muted); margin-top:4px; }
+  .empty{ text-align:center; color:var(--muted); margin-top:15vh; }
+</style>
+</head>
+<body>
+<header><h1>Galería de Avatares</h1><div class="status"><span id="count">0</span><span class="dot" id="dot"></span><span id="statusText">en vivo</span></div></header>
+<main>
+  <div class="empty" id="empty">Esperando el primer avatar…</div>
+  <div class="grid" id="grid"></div>
+</main>
+<script>
+  function esc(s){ const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+  async function poll(){
+    try{
+      const res = await fetch('/api/avatar');
+      const data = await res.json();
+      const subs = data.submissions || [];
+      document.getElementById('count').textContent = subs.length;
+      document.getElementById('empty').style.display = subs.length ? 'none' : 'block';
+      document.getElementById('grid').innerHTML = subs.map(s => `
+        <div class="card"><img src="${s.imageUrl}" loading="lazy">
+        <div class="meta"><div class="team">${esc(s.name)} <span style="color:var(--muted);font-weight:400;">· ${esc(s.team)}</span></div><div class="desc">${esc(s.description)}</div></div></div>
+      `).join('');
+      document.getElementById('dot').classList.remove('stale');
+      document.getElementById('statusText').textContent = 'en vivo';
+    }catch(e){
+      document.getElementById('dot').classList.add('stale');
+      document.getElementById('statusText').textContent = 'sin conexión...';
+    }
+  }
+  poll(); setInterval(poll, 8000);
+</script>
+</body>
+</html>

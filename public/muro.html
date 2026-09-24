@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Muro de Ideas</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#0a1120; --line:rgba(120,160,220,.14); --card:#101a2e; --card-border:rgba(148,180,230,.16); --ink:#eef2fb; --muted:#8090ac; --teal:#5eead4; --amber:#f2b544; --violet:#b79cf2; }
+  *{box-sizing:border-box;}
+  body{ margin:0; min-height:100vh; background:linear-gradient(var(--line) 1px,transparent 1px) 0 0/44px 44px, linear-gradient(90deg,var(--line) 1px,transparent 1px) 0 0/44px 44px, var(--bg); color:var(--ink); font-family:'Space Grotesk',sans-serif; }
+  header{ display:flex; justify-content:space-between; align-items:center; padding:20px 32px; border-bottom:1px solid var(--card-border);}
+  h1{ font-size:1.3rem; margin:0;}
+  main{ padding:26px 32px; max-width:1100px; margin:0 auto;}
+  .synth-btn{ width:100%; padding:14px; border-radius:12px; border:1px dashed rgba(183,156,242,.5); background:rgba(183,156,242,.08); color:var(--violet); font-weight:700; cursor:pointer; font-family:inherit; font-size:.95rem;}
+  .synth-btn:disabled{ opacity:.6; cursor:wait;}
+  .synth-result{ display:none; margin-top:14px; padding:20px; border-radius:14px; background:var(--card); border:1px solid rgba(183,156,242,.35); white-space:pre-wrap; line-height:1.6;}
+  .wall{ margin-top:26px; display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:16px;}
+  .note{ background:var(--card); border:1px solid var(--card-border); border-left:4px solid var(--teal); border-radius:10px; padding:14px 16px;}
+  .note:nth-child(3n+2){ border-left-color:var(--amber);}
+  .note:nth-child(3n){ border-left-color:var(--violet);}
+  .note .team{ font-weight:600; font-size:.85rem; margin-bottom:6px;}
+  .note .idea{ font-size:.86rem; line-height:1.45; color:#dbe3f5;}
+  .empty{ text-align:center; color:var(--muted); margin-top:8vh;}
+</style>
+</head>
+<body>
+<header><h1>Muro de Ideas — Reto Arquitecto</h1><span id="count" style="font-family:'IBM Plex Mono',monospace;color:var(--muted);font-size:.8rem;">0 propuestas</span></header>
+<main>
+  <button class="synth-btn" id="synthBtn">✨ Generar síntesis con IA</button>
+  <div class="synth-result" id="synthResult"></div>
+  <div class="empty" id="empty">Esperando las primeras propuestas…</div>
+  <div class="wall" id="wall"></div>
+</main>
+<script>
+  function esc(s){ const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+  async function poll(){
+    try{
+      const res = await fetch('/api/ideas');
+      const data = await res.json();
+      const ideas = data.ideas || [];
+      document.getElementById('count').textContent = ideas.length + ' propuesta' + (ideas.length===1?'':'s');
+      document.getElementById('empty').style.display = ideas.length ? 'none' : 'block';
+      document.getElementById('wall').innerHTML = ideas.map(it => `<div class="note"><div class="team">${esc(it.name)}</div><div class="idea">${esc(it.text)}</div></div>`).join('');
+    }catch(e){}
+  }
+  poll(); setInterval(poll, 8000);
+
+  document.getElementById('synthBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('synthBtn');
+    btn.disabled = true; btn.textContent = '✨ Generando... (puede tardar unos segundos)';
+    try{
+      const res = await fetch('/api/synthesis');
+      const data = await res.json();
+      document.getElementById('synthResult').textContent = data.synthesis || 'No se recibió respuesta.';
+      document.getElementById('synthResult').style.display = 'block';
+    }catch(e){
+      document.getElementById('synthResult').textContent = 'No se pudo conectar con la IA.';
+      document.getElementById('synthResult').style.display = 'block';
+    }
+    btn.disabled = false; btn.textContent = '✨ Generar síntesis con IA';
+  });
+</script>
+</body>
+</html>

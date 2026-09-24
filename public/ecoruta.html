@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EcoRuta — La Misión</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a1120; --bg-2:#0d1526; --line:rgba(120,160,220,0.14);
+    --card:#101a2e; --card-border:rgba(148,180,230,0.16);
+    --ink:#eef2fb; --muted:#8090ac; --teal:#5eead4; --amber:#f2b544; --violet:#b79cf2; --coral:#f2917b;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0; min-height:100%;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px) 0 0/40px 40px,
+      linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0/40px 40px,
+      var(--bg);
+    color:var(--ink); font-family:'Space Grotesk', system-ui, sans-serif;
+    display:flex; justify-content:center;
+  }
+  .wrap{ width:100%; max-width:520px; padding:22px 18px 60px; }
+
+  .progress{ display:flex; align-items:center; gap:10px; margin-bottom:18px; }
+  .progress .track{ flex:1; height:6px; border-radius:3px; background:var(--card); overflow:hidden; }
+  .progress .fill{ height:100%; background:var(--teal); transition:width .4s ease; }
+  .progress .label{ font-family:'IBM Plex Mono', monospace; font-size:.7rem; color:var(--muted); white-space:nowrap; }
+
+  .tag{ font-family:'IBM Plex Mono', monospace; font-size:.72rem; letter-spacing:.08em; color:var(--teal); }
+  h1{ margin:6px 0 10px; font-size:1.3rem; font-weight:700; line-height:1.3; }
+  p.situation{ color:#dbe3f5; font-size:.95rem; line-height:1.6; margin:0 0 22px; }
+
+  .options{ display:flex; flex-direction:column; gap:10px; }
+  .opt{
+    text-align:left; width:100%; padding:14px 16px; border-radius:12px;
+    background:var(--card); border:1px solid var(--card-border); color:var(--ink);
+    font-family:'Space Grotesk', sans-serif; font-size:.9rem; line-height:1.4; cursor:pointer;
+  }
+  .opt:active{ transform: scale(.98); }
+  .opt .letter{ font-family:'IBM Plex Mono', monospace; color:var(--amber); margin-right:8px; }
+
+  .feedback{ display:none; }
+  .feedback .badge{
+    display:inline-block; font-family:'IBM Plex Mono', monospace; font-size:.7rem;
+    color:var(--teal); border:1px solid rgba(94,234,212,.35); border-radius:6px; padding:3px 8px; margin-bottom:14px;
+  }
+  .feedback .text{ font-size:.95rem; line-height:1.65; color:#dbe3f5; margin-bottom:22px; }
+  .feedback .points{ font-family:'IBM Plex Mono', monospace; font-size:.78rem; color:var(--amber); margin-bottom:20px; }
+  .discuss{
+    background:var(--bg-2); border:1px dashed rgba(94,234,212,.4); border-radius:12px;
+    padding:16px; margin-bottom:20px; text-align:center;
+  }
+  .discuss .q{ font-size:.9rem; color:#dbe3f5; margin-bottom:10px; line-height:1.5; }
+  .discuss .timer{ font-family:'IBM Plex Mono', monospace; font-size:1.6rem; color:var(--teal); font-weight:600; }
+  .discuss .timer.done{ color:var(--amber); }
+  .continue-btn{
+    width:100%; padding:14px; border-radius:10px; border:none; background:var(--teal);
+    color:#062019; font-weight:700; font-size:.95rem; cursor:pointer; font-family:'Space Grotesk', sans-serif;
+  }
+  .continue-btn:disabled{ background:var(--card); color:var(--muted); cursor:not-allowed; border:1px solid var(--card-border); }
+
+  .intro, .ending{ text-align:center; }
+  .intro h1, .ending h1{ font-size:1.5rem; }
+  .intro p, .ending p{ color:var(--muted); font-size:.9rem; line-height:1.6; }
+  .start-btn{
+    margin-top:24px; padding:15px 28px; border-radius:12px; border:none; background:var(--teal);
+    color:#062019; font-weight:700; font-size:1rem; cursor:pointer; font-family:'Space Grotesk', sans-serif;
+  }
+  .stats{ display:flex; gap:10px; justify-content:center; margin:22px 0; flex-wrap:wrap; }
+  .stat{ background:var(--card); border:1px solid var(--card-border); border-radius:10px; padding:12px 16px; min-width:100px; }
+  .stat .n{ font-family:'IBM Plex Mono', monospace; font-size:1.4rem; color:var(--amber); font-weight:600; }
+  .stat .l{ font-size:.7rem; color:var(--muted); margin-top:2px; }
+
+  .code{
+    font-family:'IBM Plex Mono', monospace; font-size:1.4rem; letter-spacing:.06em;
+    color:var(--violet); background:var(--bg-2); border:1px dashed rgba(183,156,242,.4);
+    border-radius:10px; padding:14px; margin:18px 0; user-select:all;
+  }
+  .hint{ color:var(--muted); font-size:.8rem; margin-top:16px; font-family:'IBM Plex Mono', monospace; line-height:1.5;}
+  .profile-name{ font-size:1.6rem; font-weight:700; color:var(--teal); margin:6px 0 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div id="intro" class="intro">
+    <span class="tag">MISIÓN ECORUTA</span>
+    <h1>7 días para salvar el tráfico de la ciudad</h1>
+    <p>Tu equipo fue contratado para construir EcoRuta: una app que va a ayudar a reducir el caos de tráfico en la ciudad. No necesitas saber programar — vas a tomar las decisiones que toma un ingeniero de sistemas de verdad, día tras día. Cada elección tiene una consecuencia real. Son 15 decisiones en total.</p>
+    <button class="start-btn" id="startBtn">Empezar la misión</button>
+  </div>
+
+  <div id="game" style="display:none;">
+    <div class="progress">
+      <span class="label" id="stepLabel">Paso 1/15</span>
+      <div class="track"><div class="fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+
+    <div id="decision">
+      <span class="tag" id="chapterTag"></span>
+      <h1 id="situationTitle"></h1>
+      <p class="situation" id="situationText"></p>
+      <div class="options" id="optionsList"></div>
+    </div>
+
+    <div id="feedback" class="feedback">
+      <span class="badge" id="feedbackBadge">Consecuencia</span>
+      <p class="text" id="feedbackText"></p>
+      <div class="discuss">
+        <div class="q" id="discussQ"></div>
+        <div class="timer" id="timerText">1:30</div>
+      </div>
+      <button class="continue-btn" id="continueBtn">Siguiente decisión →</button>
+    </div>
+  </div>
+
+  <div id="ending" class="ending" style="display:none;">
+    <span class="tag">MISIÓN COMPLETADA</span>
+    <div class="profile-name" id="profileName"></div>
+    <p id="profileDesc"></p>
+    <div class="stats">
+      <div class="stat"><div class="n" id="finalScore">0</div><div class="l">puntos</div></div>
+    </div>
+    <div id="submitArea">
+      <p class="hint">Escribe tu nombre (el mismo que usaste en tu avatar) para registrar tu resultado en el marcador general:</p>
+      <input id="teamInput" type="text" placeholder="Tu nombre" style="width:100%;padding:12px 14px;border-radius:10px;background:var(--card);border:1px solid var(--card-border);color:var(--ink);font-family:inherit;font-size:.92rem;">
+      <button class="start-btn" id="submitBtn" style="margin-top:14px;">Enviar resultado</button>
+      <p class="hint" id="submitMsg"></p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const CHAPTERS = [
+    {
+      tag: 'Día 1 · El problema', title: '¿Por dónde empiezan?',
+      text: 'La alcaldía los contrató para resolver el tráfico de la ciudad. Tienen una reunión en una semana y no saben nada del problema todavía.',
+      options: [
+        { label: 'Salir a hablar con la gente que sufre el tráfico todos los días', points: 15,
+          feedback: 'Buena jugada. Hablando con la gente descubren que el problema no es solo "hay muchos carros" — es que nadie sabe cuándo va a llegar el bus, así que todos prefieren usar carro por si acaso. Esto es lo primero que hace un ingeniero de sistemas real: entender el problema antes de construir nada.' },
+        { label: 'Meterse directo a programar una app', points: 5,
+          feedback: 'Empiezan a programar rápido, pero a los 2 días se dan cuenta de que no saben qué problema están resolviendo exactamente. Tienen que parar y devolverse a investigar — perdieron tiempo valioso. Un error muy común: construir antes de entender.' },
+        { label: 'Buscar qué apps parecidas ya existen y copiarles ideas', points: 10,
+          feedback: 'Encuentran 3 apps similares en otras ciudades. Les da buenas ideas, pero ninguna resuelve el problema específico de su ciudad — el transporte público aquí no tiene datos en tiempo real, así que copiar no basta. Sirve como punto de partida, no como solución completa.' },
+      ]
+    },
+    {
+      tag: 'Día 1 · Prioridades', title: 'Con lo que averiguaron, ¿qué atacan primero?',
+      text: 'Encontraron tres problemas grandes, pero no hay tiempo para resolverlos todos a la vez.',
+      options: [
+        { label: 'Que los buses llegan tarde sin avisar', points: 12,
+          feedback: 'Deciden enfocarse en la impuntualidad. Es un problema visible y medible — buena señal, porque los ingenieros de sistemas prefieren empezar por lo que se puede medir claramente.' },
+        { label: 'Que no hay información en tiempo real de nada', points: 15,
+          feedback: 'Excelente prioridad. Si arreglan esto, muchos otros problemas (impuntualidad, desconfianza) se vuelven más fáciles de resolver después. Atacar la causa raíz en vez de los síntomas es una de las habilidades más valiosas de un ingeniero.' },
+        { label: 'Que la gente no confía en el transporte público', points: 8,
+          feedback: 'La confianza es difícil de arreglar directamente — no es algo que se "programe". Se dan cuenta de que primero necesitan datos reales para poder generar confianza después. Un aprendizaje importante: no todos los problemas se resuelven en el orden que uno quisiera.' },
+      ]
+    },
+    {
+      tag: 'Día 2 · Diseño', title: '¿Qué construyen primero?',
+      text: 'Tienen que decidir en qué invertir sus primeros días de trabajo.',
+      options: [
+        { label: 'Una app bonita, aunque todavía no tenga datos reales', points: 6,
+          feedback: 'La app se ve increíble en las presentaciones, pero cuando la prueban con datos reales, no sirve — porque nunca tuvo datos reales de verdad. Bonito no es lo mismo que útil.' },
+        { label: 'Un sistema simple pero que sí use datos reales de los buses', points: 15,
+          feedback: 'No es la app más bonita del mundo, pero funciona de verdad. Esto es un "MVP" (producto mínimo viable) — la versión más simple que ya resuelve el problema real. Es una de las ideas centrales de la ingeniería de sistemas moderna.' },
+        { label: 'Las dos cosas al mismo tiempo', points: 8,
+          feedback: 'Intentan hacer todo a la vez y terminan la semana con una app a medias y datos a medias. Un ingeniero de sistemas aprende rápido que enfocarse en una cosa primero casi siempre gana contra hacer dos cosas mal.' },
+      ]
+    },
+    {
+      tag: 'Día 2 · El equipo', title: '¿A quién priorizan sumar al equipo?',
+      text: 'Solo tienen presupuesto para una persona más por ahora.',
+      options: [
+        { label: 'Un programador muy experimentado', points: 8,
+          feedback: 'El código mejora mucho, pero nadie del equipo entiende bien cómo piensan los usuarios reales del transporte público. Falta esa mirada.' },
+        { label: 'Una diseñadora que entienda cómo piensan los usuarios', points: 12,
+          feedback: 'La app se vuelve mucho más fácil de usar. Se dan cuenta de que construir algo técnicamente correcto no sirve de nada si la gente no entiende cómo usarlo.' },
+        { label: 'Alguien que conozca a fondo el sistema de transporte público', points: 15,
+          feedback: 'Resulta ser la mejor decisión: esa persona sabe exactamente dónde conseguir los datos reales de los buses, algo que les hubiera tomado semanas descubrir solos. El conocimiento del problema real vale oro.' },
+      ]
+    },
+    {
+      tag: 'Día 3 · Primeras pruebas', title: 'El sistema se cae cuando muchas personas lo usan a la vez',
+      text: 'Probaron la app con 50 personas y se congeló por completo.',
+      options: [
+        { label: 'Reiniciar todo y seguir probando', points: 6,
+          feedback: 'El reinicio "arregla" el problema por un rato, pero vuelve a pasar 20 minutos después. Reiniciar sin entender la causa es solo posponer el problema.' },
+        { label: 'Investigar exactamente qué parte falla y por qué', points: 15,
+          feedback: 'Encuentran que el sistema intenta consultar la ubicación de todos los buses al mismo tiempo cada vez que alguien abre la app, en vez de guardarla y actualizarla poco a poco. Ahora que saben la causa exacta, pueden arreglarlo de verdad. Esto se llama "debugging" — encontrar la causa raíz, no solo el síntoma.' },
+        { label: 'Pedirle a la gente que la use en otro horario', points: 3,
+          feedback: 'Evitan el problema en vez de resolverlo. Funciona por ahora, pero el día del lanzamiento real no van a poder controlar cuándo la gente usa la app.' },
+      ]
+    },
+    {
+      tag: 'Día 3 · Antes de lanzar', title: 'Encuentran un error justo antes de la fecha de lanzamiento',
+      text: 'A veces la app muestra el bus equivocado en la ubicación equivocada. No es constante, pero pasa.',
+      options: [
+        { label: 'Lanzar igual, ya hay una fecha comprometida con la alcaldía', points: 4,
+          feedback: 'Lanzan a tiempo, pero el primer día varias personas se quejan públicamente de que la app "miente". La confianza que tanto les costó construir se ve afectada desde el primer día.' },
+        { label: 'Esperar una semana más para arreglarlo bien', points: 10,
+          feedback: 'La alcaldía se molesta un poco por el retraso, pero cuando lanzan, la app funciona bien y la gente confía en ella desde el inicio. A veces ir más lento al principio ahorra mucho dolor de cabeza después.' },
+        { label: 'Lanzar solo para un grupo pequeño de usuarios primero', points: 15,
+          feedback: 'Excelente decisión. Lanzan a 200 personas, detectan el error rápido porque hay pocos usuarios reportando, lo arreglan, y luego lanzan a toda la ciudad con confianza. Esto se llama un "lanzamiento gradual" — una práctica muy usada en la industria real.' },
+      ]
+    },
+    {
+      tag: 'Día 4 · Ética y datos', title: 'Un usuario se queja: la app usa su ubicación sin que quede claro para qué',
+      text: 'La app necesita la ubicación del usuario para funcionar bien, pero nunca explicaron claramente por qué la piden.',
+      options: [
+        { label: 'Ignorar la queja, es normal en cualquier app', points: 3,
+          feedback: 'Más usuarios empiezan a desconfiar y algunos dejan de usar la app. Ignorar preocupaciones sobre privacidad casi siempre sale caro a largo plazo.' },
+        { label: 'Agregar un aviso claro explicando para qué se usa y pedir permiso', points: 15,
+          feedback: 'Los usuarios lo agradecen — de hecho, algunos comentan que ahora confían más en la app que antes de la queja. Ser transparente sobre el uso de datos es una responsabilidad clave de cualquier ingeniero, no un trámite legal más.' },
+        { label: 'Quitar esa función por completo para evitar problemas', points: 8,
+          feedback: 'Evitan la polémica, pero la app pierde una función que la hacía mucho más útil. A veces la solución no es eliminar algo, sino explicarlo bien.' },
+      ]
+    },
+    {
+      tag: 'Día 4 · La alcaldía', title: 'Piden una función nueva que no estaba en el plan original',
+      text: '"Sería genial si la app también mostrara el clima" — dice el alcalde en una reunión, frente a todo su equipo.',
+      options: [
+        { label: 'Decir que sí a todo para quedar bien con la alcaldía', points: 5,
+          feedback: 'Aceptan, pero eso les quita tiempo de las funciones que sí importaban. Al final del mes, lo esencial va atrasado por atender algo secundario.' },
+        { label: 'Explicar con calma el impacto que eso tiene en tiempo y prioridades', points: 15,
+          feedback: 'El alcalde entiende y acepta dejarlo para una segunda versión. Explicar el "por qué no ahora" con argumentos claros es una habilidad tan importante como programar.' },
+        { label: 'Decir que no de forma tajante, es una petición absurda', points: 6,
+          feedback: 'La función no se agrega, pero la relación con la alcaldía se vuelve un poco tensa. Tenían razón técnicamente, pero la forma de decirlo también importa.' },
+      ]
+    },
+    {
+      tag: 'Día 5 · Presión de tiempo', title: 'Se acerca la fecha límite y faltan pruebas por hacer',
+      text: 'Si prueban todo como estaba planeado, no van a llegar a la fecha.',
+      options: [
+        { label: 'Reducir las pruebas para cumplir con la fecha', points: 4,
+          feedback: 'Cumplen la fecha, pero dos semanas después aparecen varios errores que las pruebas hubieran detectado. Terminan arreglando en producción lo que debieron arreglar antes.' },
+        { label: 'Pedir más tiempo aunque genere fricción', points: 12,
+          feedback: 'Consiguen unos días más. No es la conversación más cómoda, pero el resultado final es mucho más sólido.' },
+        { label: 'Lanzar solo lo que sí alcanzaron a probar bien', points: 15,
+          feedback: 'Buena decisión: lanzan una versión más pequeña pero completamente probada, y dejan el resto para la siguiente actualización. Mejor algo pequeño que funcione, que algo grande a medias.' },
+      ]
+    },
+    {
+      tag: 'Día 5 · Trabajo en equipo', title: 'Un compañero no está de acuerdo con una decisión tuya',
+      text: 'Tú quieres una forma de organizar los datos, tu compañero quiere otra. Ambas podrían funcionar.',
+      options: [
+        { label: 'Imponer tu idea porque tienes más experiencia', points: 4,
+          feedback: 'La decisión se toma rápido, pero tu compañero se siente ignorado y el ambiente del equipo se enfría un poco los siguientes días.' },
+        { label: 'Escuchar su punto de vista y buscar un punto medio', points: 15,
+          feedback: 'Entre los dos encuentran una tercera opción mejor que las dos ideas originales por separado. Esto pasa más seguido de lo que parece cuando de verdad se escuchan.' },
+        { label: 'Dejar que decida él para evitar el conflicto', points: 7,
+          feedback: 'Evitan la discusión, pero tú te quedas con la sensación de que tu idea también tenía algo bueno que no se consideró. Evitar el conflicto no siempre es lo mismo que resolverlo.' },
+      ]
+    },
+    {
+      tag: 'Día 6 · Usuarios reales', title: 'Nadie entiende cómo usar una parte de la app',
+      text: 'En las pruebas con usuarios reales, 8 de 10 personas se confunden en la misma pantalla.',
+      options: [
+        { label: 'Ignorarlo, ya está casi lista para lanzar', points: 3,
+          feedback: 'Lanzan a tiempo, pero esa misma pantalla se convierte en la razón número uno de quejas durante el primer mes.' },
+        { label: 'Rediseñar esa parte aunque atrase un poco el lanzamiento', points: 15,
+          feedback: 'Se atrasan dos días, pero cuando lanzan, esa pantalla ya no genera ninguna confusión. Escuchar a los usuarios reales antes de lanzar ahorra muchos dolores de cabeza después.' },
+        { label: 'Agregar un tutorial largo en vez de simplificar la pantalla', points: 6,
+          feedback: 'El tutorial ayuda un poco, pero casi nadie lo lee completo. El problema seguía siendo el diseño, no la falta de explicación.' },
+      ]
+    },
+    {
+      tag: 'Día 7 · Lanzamiento', title: 'La app se cae justo en la hora pico del primer día',
+      text: 'Miles de personas intentan usarla al mismo tiempo y el sistema colapsa.',
+      options: [
+        { label: 'Apagar todo y reiniciar desde cero', points: 6,
+          feedback: 'Funciona por 10 minutos y se vuelve a caer — el problema seguía ahí, solo lo pausaron.' },
+        { label: 'Buscar rápido cuál parte específica está fallando', points: 15,
+          feedback: 'En minutos encuentran que un solo tipo de consulta está saturando todo. La arreglan sin apagar el resto del sistema. Mantener la calma y buscar la causa específica, incluso bajo presión, es una habilidad que se entrena.' },
+        { label: 'Culpar a la falta de tiempo y seguir sin investigar más', points: 2,
+          feedback: 'El problema vuelve a pasar la semana siguiente, exactamente igual. Sin entender la causa, no hay forma de evitar que se repita.' },
+      ]
+    },
+    {
+      tag: 'Día 7 · Éxito inesperado', title: 'La app crece muchísimo y el sistema empieza a ir lento',
+      text: 'Más gente de la que esperaban está usando EcoRuta todos los días.',
+      options: [
+        { label: 'Comprar más capacidad de servidores sin revisar nada más', points: 6,
+          feedback: 'La app mejora un poco, pero el costo se dispara — estaban pagando por resolver con dinero un problema que era de diseño.' },
+        { label: 'Revisar primero qué parte del sistema es el verdadero cuello de botella', points: 15,
+          feedback: 'Encuentran que una sola parte del sistema estaba haciendo mucho trabajo innecesario. La arreglan y la app vuelve a ir rápido, sin gastar de más. Entender antes de gastar es una regla de oro en ingeniería.' },
+        { label: 'Limitar cuántas personas pueden usarla al mismo tiempo', points: 4,
+          feedback: 'El sistema deja de fallar, pero muchos usuarios se quedan afuera justo cuando más gente quería usar la app. Resuelve el síntoma, no el problema.' },
+      ]
+    },
+    {
+      tag: 'Día 7 · Comunicación pública', title: 'Una periodista pregunta cómo funciona la app y si tiene riesgos',
+      text: 'Va a salir en las noticias de la ciudad. Lo que digan importa.',
+      options: [
+        { label: 'Exagerar lo buena que es y evitar hablar de riesgos', points: 4,
+          feedback: 'La nota sale muy positiva al principio, pero cuando la gente descubre las limitaciones reales por su cuenta, la confianza cae más fuerte de lo que hubiera caído con honestidad desde el inicio.' },
+        { label: 'Explicar honestamente cómo funciona y qué se sigue mejorando', points: 15,
+          feedback: 'La nota sale equilibrada y la gente valora la honestidad. Comunicar con claridad, incluyendo las limitaciones, genera más confianza a largo plazo que prometer perfección.' },
+        { label: 'No responder por miedo a que digan algo negativo', points: 5,
+          feedback: 'La periodista escribe la nota igual, pero sin su versión — y algunas suposiciones en el artículo terminan siendo incorrectas. Callar no controla la historia, solo la deja en manos de otros.' },
+      ]
+    },
+    {
+      tag: 'Día 7 · Cierre de la misión', title: '¿Qué sigue para EcoRuta?',
+      text: 'La primera versión fue un éxito razonable. Ahora hay que decidir el siguiente paso.',
+      options: [
+        { label: 'Llevarla a otras ciudades de inmediato', points: 8,
+          feedback: 'La expansión rápida trae atención y crecimiento, pero también estira al equipo — algunas cosas en la ciudad original quedan sin pulir.' },
+        { label: 'Seguir mejorándola en esta ciudad antes de expandirse', points: 15,
+          feedback: 'Deciden consolidar primero lo que ya tienen. Cuando finalmente se expanden meses después, lo hacen con un producto mucho más sólido detrás. Crecer rápido no siempre es crecer bien.' },
+        { label: 'Compartir el código para que otros equipos la mejoren', points: 12,
+          feedback: 'Otros desarrolladores empiezan a aportar ideas y mejoras que el equipo nunca hubiera pensado solo. Abrir el trabajo a otros — algo muy común en tecnología — multiplica lo que se puede lograr.' },
+      ]
+    },
+  ];
+
+  const PROFILES = [
+    { min: 0,   name: 'Novato Prometedor 🌱', desc: 'Completaste la misión y tomaste decisiones válidas, aunque algunas con prisa. Todo ingeniero empieza así — lo importante es que ya entiendes el proceso.' },
+    { min: 110, name: 'Ingeniero en Formación 🔧', desc: 'Tomaste buenas decisiones la mayoría del tiempo, priorizando resolver problemas reales. Vas por buen camino.' },
+    { min: 160, name: 'Arquitecto de Soluciones 🏗️', desc: 'Pensaste en el usuario, en el equipo y en el sistema al mismo tiempo — exactamente el equilibrio que busca un buen ingeniero de sistemas.' },
+    { min: 200, name: 'Leyenda del Sistema 🏆', desc: 'Casi todas tus decisiones mostraron pensamiento sistémico real: entender antes de construir, ser honesto con los datos, resolver causas y no síntomas. Este es el nivel al que aspira un ingeniero senior.' },
+  ];
+
+  let step = 0;
+  let score = 0;
+
+  const introEl = document.getElementById('intro');
+  const gameEl = document.getElementById('game');
+  const endingEl = document.getElementById('ending');
+  const decisionEl = document.getElementById('decision');
+  const feedbackEl = document.getElementById('feedback');
+  const stepLabel = document.getElementById('stepLabel');
+  const progressFill = document.getElementById('progressFill');
+  const chapterTag = document.getElementById('chapterTag');
+  const situationTitle = document.getElementById('situationTitle');
+  const situationText = document.getElementById('situationText');
+  const optionsList = document.getElementById('optionsList');
+  const feedbackText = document.getElementById('feedbackText');
+  const continueBtn = document.getElementById('continueBtn');
+  const discussQ = document.getElementById('discussQ');
+  const timerText = document.getElementById('timerText');
+
+  const DISCUSS_PROMPTS = [
+    '¿Ustedes habrían elegido lo mismo? ¿Por qué?',
+    '¿Qué hubiera pasado si elegían otra opción?',
+    '¿Alguien del equipo hubiera decidido distinto? Discútanlo.',
+    '¿Esto se parece a alguna decisión que ya hayan tomado en la vida real?',
+    '¿Qué le dirían a otro equipo que va a tomar esta misma decisión?',
+  ];
+  const WAIT_SECONDS = 60;
+  let timerInterval = null;
+
+  function startDiscussTimer(){
+    discussQ.textContent = '🗣️ ' + DISCUSS_PROMPTS[Math.floor(Math.random() * DISCUSS_PROMPTS.length)];
+    let remaining = WAIT_SECONDS;
+    continueBtn.disabled = false;
+    continueBtn.textContent = 'Siguiente decisión → (o espera el conteo)';
+    timerText.classList.remove('done');
+    const render = () => {
+      const m = Math.floor(remaining / 60);
+      const s = String(remaining % 60).padStart(2, '0');
+      timerText.textContent = `${m}:${s}`;
+    };
+    render();
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      remaining--;
+      if (remaining <= 0){
+        clearInterval(timerInterval);
+        timerText.textContent = '¡Listo!';
+        timerText.classList.add('done');
+        continueBtn.textContent = 'Siguiente decisión →';
+      } else {
+        render();
+      }
+    }, 1000);
+  }
+
+  function renderStep(){
+    const ch = CHAPTERS[step];
+    decisionEl.style.display = 'block';
+    feedbackEl.style.display = 'none';
+    stepLabel.textContent = `Paso ${step + 1}/${CHAPTERS.length}`;
+    progressFill.style.width = ((step) / CHAPTERS.length * 100) + '%';
+    chapterTag.textContent = ch.tag;
+    situationTitle.textContent = ch.title;
+    situationText.textContent = ch.text;
+    optionsList.innerHTML = '';
+    const letters = ['A', 'B', 'C'];
+    ch.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.innerHTML = `<span class="letter">${letters[i]}</span>${opt.label}`;
+      btn.addEventListener('click', () => chooseOption(opt));
+      optionsList.appendChild(btn);
+    });
+  }
+
+  function chooseOption(opt){
+    score += opt.points;
+    decisionEl.style.display = 'none';
+    feedbackEl.style.display = 'block';
+    feedbackText.textContent = opt.feedback;
+    progressFill.style.width = ((step + 1) / CHAPTERS.length * 100) + '%';
+    startDiscussTimer();
+  }
+
+  continueBtn.addEventListener('click', () => {
+    step++;
+    if (step >= CHAPTERS.length){
+      showEnding();
+    } else {
+      renderStep();
+    }
+  });
+
+  function showEnding(){
+    gameEl.style.display = 'none';
+    endingEl.style.display = 'block';
+    let profile = PROFILES[0];
+    for (const p of PROFILES) if (score >= p.min) profile = p;
+    document.getElementById('profileName').textContent = profile.name;
+    document.getElementById('profileDesc').textContent = profile.desc;
+    document.getElementById('finalScore').textContent = score;
+  }
+
+  document.getElementById('submitBtn').addEventListener('click', async () => {
+    const personName = document.getElementById('teamInput').value.trim();
+    const msg = document.getElementById('submitMsg');
+    if (!personName){ msg.textContent = 'Escribe tu nombre.'; return; }
+    msg.textContent = 'Enviando...';
+    try{
+      const res = await fetch('/api/round', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name: personName, round:'ecoruta', points: score }) });
+      const data = await res.json();
+      if (!data.ok) throw new Error();
+      msg.textContent = '¡Registrado! Revisa el marcador en pantalla.';
+      document.getElementById('submitBtn').disabled = true;
+    }catch(e){ msg.textContent = 'No se pudo enviar, intenta de nuevo.'; }
+  });
+
+  document.getElementById('startBtn').addEventListener('click', () => {
+    introEl.style.display = 'none';
+    gameEl.style.display = 'block';
+    renderStep();
+  });
+</script>
+</body>
+</html>

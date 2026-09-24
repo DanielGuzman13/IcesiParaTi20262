@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Reto 1: Detecta al Impostor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#0a1120; --card:#101a2e; --card-border:rgba(148,180,230,.16); --ink:#eef2fb; --muted:#8090ac; --teal:#5eead4; }
+  *{box-sizing:border-box;}
+  body{ margin:0; min-height:100vh; background:var(--bg); color:var(--ink); font-family:'Space Grotesk',sans-serif; display:flex; justify-content:center; padding:28px 18px 60px;}
+  .wrap{ width:100%; max-width:440px; }
+  h1{ font-size:1.25rem; margin-bottom:6px;}
+  p.sub{ color:var(--muted); font-size:.88rem; margin:0 0 22px; line-height:1.5;}
+  label{ display:block; font-family:'IBM Plex Mono',monospace; font-size:.72rem; color:var(--teal); margin:16px 0 6px;}
+  input{ width:100%; padding:11px 13px; border-radius:10px; background:var(--card); border:1px solid var(--card-border); color:var(--ink); font-family:'Space Grotesk',sans-serif; font-size:.92rem; }
+  button{ margin-top:20px; width:100%; padding:14px; border-radius:10px; border:none; background:var(--teal); color:#062019; font-weight:700; font-size:.95rem; cursor:pointer; }
+  button:disabled{ opacity:.6; }
+  .result{ display:none; margin-top:22px; padding:20px; border-radius:14px; background:var(--card); border:1px solid rgba(94,234,212,.35); text-align:center;}
+  .err{ color:#f2705e; font-size:.82rem; margin-top:10px; min-height:1em;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🕵️ Reto 1: Detecta al Impostor</h1>
+  <p class="sub">Uno de los dos textos que mostró el presentador lo escribió una IA. ¿Cuál fue?</p>
+
+  <div id="formArea">
+    <label>Tu nombre</label>
+    <input id="personName" type="text" placeholder="El mismo que usaste en tu avatar">
+    <label>Respuesta</label>
+    <input id="answer" type="text" placeholder="Escribe A o B">
+    <button id="sendBtn">Enviar respuesta</button>
+    <div class="err" id="err"></div>
+  </div>
+
+  <div class="result" id="result">
+    <p>Respuesta registrada 🛰️ Mira el marcador en pantalla.</p>
+  </div>
+</div>
+
+<script>
+  const sendBtn = document.getElementById('sendBtn');
+  const err = document.getElementById('err');
+  sendBtn.addEventListener('click', async () => {
+    const personName = document.getElementById('personName').value.trim();
+    const answer = document.getElementById('answer').value.trim();
+    if (!personName || !answer){ err.textContent = 'Completa los dos campos.'; return; }
+    err.textContent = '';
+    sendBtn.disabled = true; sendBtn.textContent = 'Enviando...';
+    try{
+      const res = await fetch('/api/round', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name: personName, round: 'r1', answer }) });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || 'Error');
+      document.getElementById('formArea').style.display = 'none';
+      document.getElementById('result').style.display = 'block';
+    }catch(e){
+      err.textContent = 'No se pudo enviar. Intenta de nuevo.';
+      sendBtn.disabled = false; sendBtn.textContent = 'Enviar respuesta';
+    }
+  });
+</script>
+</body>
+</html>

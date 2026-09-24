@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Crea tu Avatar de Ingeniero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#0a1120; --card:#101a2e; --card-border:rgba(148,180,230,.16); --ink:#eef2fb; --muted:#8090ac; --teal:#5eead4; }
+  *{box-sizing:border-box;}
+  body{ margin:0; min-height:100vh; background:var(--bg); color:var(--ink); font-family:'Space Grotesk',sans-serif; display:flex; justify-content:center; padding:28px 18px 60px;}
+  .wrap{ width:100%; max-width:440px; }
+  h1{ font-size:1.3rem; margin-bottom:6px;}
+  p.sub{ color:var(--muted); font-size:.88rem; margin:0 0 22px; line-height:1.5;}
+  label{ display:block; font-family:'IBM Plex Mono',monospace; font-size:.72rem; color:var(--teal); margin:16px 0 6px;}
+  input, textarea{ width:100%; padding:11px 13px; border-radius:10px; background:var(--card); border:1px solid var(--card-border); color:var(--ink); font-family:'Space Grotesk',sans-serif; font-size:.92rem; }
+  textarea{ min-height:90px; resize:vertical; }
+  button{ margin-top:20px; width:100%; padding:14px; border-radius:10px; border:none; background:var(--teal); color:#062019; font-weight:700; font-size:.95rem; cursor:pointer; }
+  button:disabled{ opacity:.6; }
+  .result{ display:none; margin-top:22px; padding:20px; border-radius:14px; background:var(--card); border:1px solid rgba(94,234,212,.35); text-align:center;}
+  .result img{ max-width:100%; border-radius:10px; margin:14px 0; }
+  .err{ color:#f2705e; font-size:.82rem; margin-top:10px; min-height:1em;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🧑‍💻 Crea tu Avatar de Ingeniero</h1>
+  <p class="sub">Describe cómo se ve un ingeniero(a) de sistemas del futuro.</p>
+
+  <div id="formArea">
+    <label>Tu nombre</label>
+    <input id="personName" type="text" placeholder="Ej: María">
+    <label>Nombre del equipo</label>
+    <input id="team" type="text" placeholder="Ej: Los Compiladores">
+    <label>Describe tu avatar</label>
+    <textarea id="desc" placeholder="Ej: un ingeniero cyberpunk flotando entre líneas de código, luces neón, capa de circuitos"></textarea>
+    <button id="sendBtn">Generar mi avatar</button>
+    <div class="err" id="err"></div>
+  </div>
+
+  <div class="result" id="result">
+    <p>¡Listo! Tu avatar ya va camino a la pantalla principal 👀</p>
+    <img id="resultImg" alt="Tu avatar">
+  </div>
+</div>
+
+<script>
+  const sendBtn = document.getElementById('sendBtn');
+  const err = document.getElementById('err');
+  sendBtn.addEventListener('click', async () => {
+    const personName = document.getElementById('personName').value.trim();
+    const team = document.getElementById('team').value.trim();
+    const description = document.getElementById('desc').value.trim();
+    if (!personName || !team || !description){ err.textContent = 'Completa los tres campos.'; return; }
+    err.textContent = '';
+    sendBtn.disabled = true; sendBtn.textContent = 'Generando...';
+    try{
+      const res = await fetch('/api/avatar', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name: personName, team, description }) });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || 'Error');
+      document.getElementById('formArea').style.display = 'none';
+      document.getElementById('result').style.display = 'block';
+      document.getElementById('resultImg').src = data.entry.imageUrl;
+    }catch(e){
+      err.textContent = 'No se pudo enviar. Intenta de nuevo.';
+      sendBtn.disabled = false; sendBtn.textContent = 'Generar mi avatar';
+    }
+  });
+</script>
+</body>
+</html>
