@@ -20,7 +20,7 @@
 </style>
 </head>
 <body>
-<a href="/" style="position:fixed;top:14px;left:14px;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--muted);text-decoration:none;border:1px solid var(--card-border);padding:6px 10px;border-radius:8px;background:var(--card);z-index:50;">← Inicio<\/a>
+<a href="/" style="position:fixed;top:14px;left:14px;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--muted);text-decoration:none;border:1px solid var(--card-border);padding:6px 10px;border-radius:8px;background:var(--card);z-index:50;">← Inicio</a>
 <div class="wrap">
   <h1>📡 Terminal de Rescate</h1>
   <p class="sub">Escribe el número de etapa que está en pantalla y la letra del comando que tu equipo quiere ejecutar.</p>
@@ -35,6 +35,7 @@
   <div class="result" id="result">Voto registrado 📡</div>
 </div>
 <script>
+  const currentSalon = (function(){ try{ const p = new URLSearchParams(location.search).get('salon'); if (p) localStorage.setItem('icesiSalon', p); return (localStorage.getItem('icesiSalon') || 'general').toLowerCase(); }catch(e){ return 'general'; } })();
   document.getElementById('sendBtn').addEventListener('click', async () => {
     const etapa = document.getElementById('etapa').value.trim();
     const opcion = document.getElementById('opcion').value.trim();
@@ -42,7 +43,7 @@
     if (!etapa || !opcion){ err.textContent = 'Completa los dos campos.'; return; }
     err.textContent = '';
     try{
-      const res = await fetch('/api/terminal', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ etapa, opcion }) });
+      const res = await fetch('/api/terminal', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ etapa, opcion, salon: currentSalon }) });
       const data = await res.json();
       if (!data.ok) throw new Error();
       document.getElementById('formArea').style.display='none';

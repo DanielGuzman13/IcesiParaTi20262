@@ -103,6 +103,7 @@
 <script>
   const CORRECT_ORDER = ['trigger', 'code', 'save', 'show'];
   const personName = (function(){ try{ return localStorage.getItem('icesiPersonName') || ''; }catch(e){ return ''; } })();
+  const currentSalon = (function(){ try{ const p = new URLSearchParams(location.search).get('salon'); if (p) localStorage.setItem('icesiSalon', p); return (localStorage.getItem('icesiSalon') || 'general').toLowerCase(); }catch(e){ return 'general'; } })();
   const BLOCKS = {
     trigger: { icon: '📋', name: 'Disparador', desc: 'El equipo llena el formulario' },
     code:    { icon: '🧠', name: 'Código', desc: 'Se arma el prompt para la IA' },
@@ -173,7 +174,7 @@
     if (!personName){ msg.textContent = 'Primero crea tu avatar en /avatar-form.html'; return; }
     msg.textContent = 'Enviando...';
     try{
-      const res = await fetch('/api/round', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name: personName, round:'pipeline', answer: SUCCESS_CODE }) });
+      const res = await fetch('/api/round', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name: personName, round:'pipeline', answer: SUCCESS_CODE, salon: currentSalon }) });
       const data = await res.json();
       if (!data.ok) throw new Error();
       msg.textContent = '¡Registrado! Revisa el marcador en pantalla.';

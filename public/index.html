@@ -41,5 +41,23 @@
   <a class="card" href="/terminal-live.html"><div class="t">📊 Votos del Terminal en Vivo</div><div class="d">/terminal-live.html</div></a>
   <a class="card" href="/muro.html"><div class="t">📌 Muro de Ideas + Síntesis IA</div><div class="d">/muro.html</div></a>
 </div>
+
+<script>
+  (function(){
+    try{
+      const params = new URLSearchParams(location.search);
+      const salon = params.get('salon');
+      if (salon) {
+        document.querySelectorAll('a.card').forEach(a => {
+          const url = new URL(a.getAttribute('href'), location.href);
+          url.searchParams.set('salon', salon);
+          a.setAttribute('href', url.pathname + url.search);
+        });
+        const sub = document.querySelector('p.sub');
+        if (sub) sub.textContent = 'Menú de actividades · Salón ' + salon.toUpperCase();
+      }
+    }catch(e){}
+  })();
+</script>
 </body>
 </html>

@@ -8,7 +8,7 @@
 <style>
   :root{ --bg:#0a1120; --line:rgba(120,160,220,.14); --card:#101a2e; --card-border:rgba(148,180,230,.14); --ink:#eef2fb; --muted:#8090ac; --teal:#5eead4; --amber:#f2b544; }
   *{box-sizing:border-box;}
-  body{ margin:0; min-height:100vh; background:linear-gradient(var(--line) 1px,transparent 1px) 0 0/48px 48px, linear-gradient(90deg,var(--line) 1px,transparent 1px) 0 0/48px 48px, var(--bg); color:var(--ink); font-family:'Space Grotesk',sans-serif; }
+  body{ margin:0; min-height:100vh; overflow-y:auto; -webkit-overflow-scrolling:touch; background:linear-gradient(var(--line) 1px,transparent 1px) 0 0/48px 48px, linear-gradient(90deg,var(--line) 1px,transparent 1px) 0 0/48px 48px, var(--bg); color:var(--ink); font-family:'Space Grotesk',sans-serif; }
   header{ display:flex; justify-content:space-between; align-items:center; padding:20px 32px; border-bottom:1px solid var(--card-border);}
   h1{ font-size:1.4rem; margin:0; }
   .status{ font-family:'IBM Plex Mono',monospace; font-size:.8rem; color:var(--muted); display:flex; align-items:center; gap:8px;}
@@ -25,17 +25,19 @@
 </style>
 </head>
 <body>
-<a href="/" style="position:fixed;top:14px;left:14px;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--muted);text-decoration:none;border:1px solid var(--card-border);padding:6px 10px;border-radius:8px;background:var(--card);z-index:50;">← Inicio<\/a>
-<header><h1>Galería de Avatares</h1><div class="status"><span id="count">0</span><span class="dot" id="dot"></span><span id="statusText">en vivo</span></div></header>
+<a href="/" style="position:fixed;top:14px;left:14px;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--muted);text-decoration:none;border:1px solid var(--card-border);padding:6px 10px;border-radius:8px;background:var(--card);z-index:50;">← Inicio</a>
+<header><h1>Galería de Avatares <span id="salonBadge" style="font-size:.85rem; color:var(--muted); font-family:'IBM Plex Mono',monospace;"></span></h1><div class="status"><span id="count">0</span><span class="dot" id="dot"></span><span id="statusText">en vivo</span></div></header>
 <main>
   <div class="empty" id="empty">Esperando el primer avatar…</div>
   <div class="grid" id="grid"></div>
 </main>
 <script>
+  const currentSalon = (function(){ try{ return (new URLSearchParams(location.search).get('salon') || 'general').toLowerCase(); }catch(e){ return 'general'; } })();
   function esc(s){ const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+  document.getElementById('salonBadge').textContent = '· Salón ' + currentSalon.toUpperCase();
   async function poll(){
     try{
-      const res = await fetch('/api/avatar');
+      const res = await fetch('/api/avatar?salon=' + encodeURIComponent(currentSalon));
       const data = await res.json();
       const subs = data.submissions || [];
       document.getElementById('count').textContent = subs.length;

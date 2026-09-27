@@ -95,6 +95,10 @@
     <span class="tag">MISIÓN ECORUTA</span>
     <h1>7 días para salvar el tráfico de la ciudad</h1>
     <p>Tu equipo fue contratado para construir EcoRuta: una app que va a ayudar a reducir el caos de tráfico en la ciudad. No necesitas saber programar — vas a tomar las decisiones que toma un ingeniero de sistemas de verdad, día tras día. Cada elección tiene una consecuencia real. Son 15 decisiones en total.</p>
+    <div id="needAvatarEco" style="display:none; text-align:center; padding:22px 20px; background:var(--card); border:1px solid var(--card-border); border-radius:14px; margin-top:10px;">
+      <p style="color:var(--muted); font-size:.88rem; line-height:1.5; margin:0;">Primero necesitas crear tu avatar para que el sistema te reconozca y guarde tus puntos.</p>
+      <a href="/avatar-form.html" style="display:inline-block; margin-top:14px; padding:12px 22px; background:var(--teal); color:#062019; border-radius:10px; text-decoration:none; font-weight:700; font-size:.9rem;">Crear mi avatar</a>
+    </div>
     <button class="start-btn" id="startBtn">Empezar la misión</button>
   </div>
 
@@ -131,8 +135,6 @@
     </div>
     <div id="submitArea">
       <p class="hint" id="identityLine"></p>
-      <button class="start-btn" id="submitBtn" style="margin-top:14px;">Enviar resultado</button>
-      <p class="hint" id="submitMsg"></p>
     </div>
   </div>
 
@@ -411,6 +413,10 @@
     feedbackText.textContent = opt.feedback;
     progressFill.style.width = ((step + 1) / CHAPTERS.length * 100) + '%';
     startDiscussTimer();
+    if (personName) {
+      fetch('/api/round', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ name: personName, round: 'ecoruta', points: opt.points, salon: currentSalon }) }).catch(()=>{});
+    }
   }
 
   continueBtn.addEventListener('click', () => {
@@ -423,6 +429,7 @@
   });
 
   const personName = (function(){ try{ return localStorage.getItem('icesiPersonName') || ''; }catch(e){ return ''; } })();
+  const currentSalon = (function(){ try{ const p = new URLSearchParams(location.search).get('salon'); if (p) localStorage.setItem('icesiSalon', p); return (localStorage.getItem('icesiSalon') || 'general').toLowerCase(); }catch(e){ return 'general'; } })();
 
   function showEnding(){
     gameEl.style.display = 'none';
@@ -432,23 +439,14 @@
     document.getElementById('profileName').textContent = profile.name;
     document.getElementById('profileDesc').textContent = profile.desc;
     document.getElementById('finalScore').textContent = score;
-    document.getElementById('identityLine').textContent = personName ? ('Conectado como: ' + personName) : 'Primero crea tu avatar en /avatar-form.html para poder enviar tu resultado.';
+    document.getElementById('identityLine').textContent = personName ? ('Conectado como: ' + personName + ' — tus puntos ya quedaron registrados en el marcador.') : 'No se guardó tu puntaje porque no tenías un avatar creado. Crea uno en /avatar-form.html la próxima vez.';
   }
 
-  document.getElementById('submitBtn').addEventListener('click', async () => {
-    const msg = document.getElementById('submitMsg');
-    if (!personName){ msg.textContent = 'Primero crea tu avatar en /avatar-form.html'; return; }
-    msg.textContent = 'Enviando...';
-    try{
-      const res = await fetch('/api/round', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name: personName, round:'ecoruta', points: score }) });
-      const data = await res.json();
-      if (!data.ok) throw new Error();
-      msg.textContent = '¡Registrado! Revisa el marcador en pantalla.';
-      document.getElementById('submitBtn').disabled = true;
-    }catch(e){ msg.textContent = 'No se pudo enviar, intenta de nuevo.'; }
-  });
-
   document.getElementById('startBtn').addEventListener('click', () => {
+    if (!personName){
+      document.getElementById('needAvatarEco').style.display = 'block';
+      return;
+    }
     introEl.style.display = 'none';
     gameEl.style.display = 'block';
     renderStep();

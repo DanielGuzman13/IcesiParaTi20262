@@ -8,7 +8,7 @@
 <style>
   :root{ --bg:#050a08; --card:#0a130f; --card-border:rgba(94,234,212,.22); --ink:#dffaf0; --muted:#6f9284; --teal:#5eead4; --amber:#f2b544;}
   *{box-sizing:border-box;}
-  body{ margin:0; min-height:100vh; background:var(--bg); color:var(--ink); font-family:'IBM Plex Mono',monospace; }
+  body{ margin:0; min-height:100vh; overflow-y:auto; -webkit-overflow-scrolling:touch; background:var(--bg); color:var(--ink); font-family:'IBM Plex Mono',monospace; }
   header{ padding:20px 32px; border-bottom:1px solid var(--card-border); display:flex; justify-content:space-between; align-items:center;}
   h1{ font-family:'Space Grotesk',sans-serif; font-size:1.4rem; margin:0;}
   main{ padding:28px 32px; max-width:700px; margin:0 auto;}
@@ -24,20 +24,22 @@
 </style>
 </head>
 <body>
-<a href="/" style="position:fixed;top:14px;left:14px;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--muted);text-decoration:none;border:1px solid var(--card-border);padding:6px 10px;border-radius:8px;background:var(--card);z-index:50;">← Inicio<\/a>
-<header><h1>Terminal — Votación en Vivo</h1></header>
+<a href="/" style="position:fixed;top:14px;left:14px;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--muted);text-decoration:none;border:1px solid var(--card-border);padding:6px 10px;border-radius:8px;background:var(--card);z-index:50;">← Inicio</a>
+<header><h1>Terminal — Votación en Vivo <span id="salonBadge" style="font-size:.8rem; color:var(--muted); font-family:'IBM Plex Mono',monospace;"></span></h1></header>
 <main>
   <div class="stage"><span>&gt; Etapa:</span><input id="etapa" value="1"></div>
   <div class="empty" id="empty">Sin votos todavía…</div>
   <div id="bars"></div>
 </main>
 <script>
+  const currentSalon = (function(){ try{ return (new URLSearchParams(location.search).get('salon') || 'general').toLowerCase(); }catch(e){ return 'general'; } })();
   function esc(s){ const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+  document.getElementById('salonBadge').textContent = '· Salón ' + currentSalon.toUpperCase();
   async function poll(){
     const etapa = document.getElementById('etapa').value.trim();
     if (!etapa) return;
     try{
-      const res = await fetch('/api/terminal?etapa=' + encodeURIComponent(etapa));
+      const res = await fetch('/api/terminal?etapa=' + encodeURIComponent(etapa) + '&salon=' + encodeURIComponent(currentSalon));
       const data = await res.json();
       const votes = data.votes || {};
       const entries = Object.entries(votes);

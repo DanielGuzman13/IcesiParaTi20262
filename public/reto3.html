@@ -51,6 +51,7 @@
 
 <script>
   const personName = (function(){ try{ return localStorage.getItem('icesiPersonName') || ''; }catch(e){ return ''; } })();
+  const currentSalon = (function(){ try{ const p = new URLSearchParams(location.search).get('salon'); if (p) localStorage.setItem('icesiSalon', p); return (localStorage.getItem('icesiSalon') || 'general').toLowerCase(); }catch(e){ return 'general'; } })();
   if (!personName){
     document.getElementById('formArea').style.display = 'none';
     document.getElementById('needAvatar').style.display = 'block';
@@ -66,7 +67,7 @@
     err.textContent = '';
     sendBtn.disabled = true; sendBtn.textContent = 'Enviando...';
     try{
-      const res = await fetch('/api/round', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name: personName, round: 'r3', answer }) });
+      const res = await fetch('/api/round', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name: personName, round: 'r3', answer, salon: currentSalon }) });
       const data = await res.json();
       if (!data.ok) throw new Error(data.error || 'Error');
       document.getElementById('formArea').style.display = 'none';

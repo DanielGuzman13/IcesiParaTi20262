@@ -1,9 +1,15 @@
 import { kvLRange } from '../lib/kv.js';
 
+function normSalon(s) {
+  const v = (s || '').toString().trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+  return v || 'general';
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   try {
-    const ideas = await kvLRange('ideas:list', 0, 39);
+    const salon = normSalon(req.query && req.query.salon);
+    const ideas = await kvLRange('ideas:list:' + salon, 0, 39);
     if (!ideas.length) {
       res.status(200).json({ synthesis: 'Todavía no hay propuestas para sintetizar.' });
       return;

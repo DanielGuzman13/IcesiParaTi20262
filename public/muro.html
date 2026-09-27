@@ -8,7 +8,7 @@
 <style>
   :root{ --bg:#0a1120; --line:rgba(120,160,220,.14); --card:#101a2e; --card-border:rgba(148,180,230,.16); --ink:#eef2fb; --muted:#8090ac; --teal:#5eead4; --amber:#f2b544; --violet:#b79cf2; }
   *{box-sizing:border-box;}
-  body{ margin:0; min-height:100vh; background:linear-gradient(var(--line) 1px,transparent 1px) 0 0/44px 44px, linear-gradient(90deg,var(--line) 1px,transparent 1px) 0 0/44px 44px, var(--bg); color:var(--ink); font-family:'Space Grotesk',sans-serif; }
+  body{ margin:0; min-height:100vh; overflow-y:auto; -webkit-overflow-scrolling:touch; background:linear-gradient(var(--line) 1px,transparent 1px) 0 0/44px 44px, linear-gradient(90deg,var(--line) 1px,transparent 1px) 0 0/44px 44px, var(--bg); color:var(--ink); font-family:'Space Grotesk',sans-serif; }
   header{ display:flex; justify-content:space-between; align-items:center; padding:20px 32px; border-bottom:1px solid var(--card-border);}
   h1{ font-size:1.3rem; margin:0;}
   main{ padding:26px 32px; max-width:1100px; margin:0 auto;}
@@ -25,8 +25,8 @@
 </style>
 </head>
 <body>
-<a href="/" style="position:fixed;top:14px;left:14px;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--muted);text-decoration:none;border:1px solid var(--card-border);padding:6px 10px;border-radius:8px;background:var(--card);z-index:50;">← Inicio<\/a>
-<header><h1>Muro de Ideas — Reto Arquitecto</h1><span id="count" style="font-family:'IBM Plex Mono',monospace;color:var(--muted);font-size:.8rem;">0 propuestas</span></header>
+<a href="/" style="position:fixed;top:14px;left:14px;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--muted);text-decoration:none;border:1px solid var(--card-border);padding:6px 10px;border-radius:8px;background:var(--card);z-index:50;">← Inicio</a>
+<header><h1>Muro de Ideas — Reto Arquitecto <span id="salonBadge" style="font-size:.8rem; color:var(--muted); font-family:'IBM Plex Mono',monospace;"></span></h1><span id="count" style="font-family:'IBM Plex Mono',monospace;color:var(--muted);font-size:.8rem;">0 propuestas</span></header>
 <main>
   <button class="synth-btn" id="synthBtn">✨ Generar síntesis con IA</button>
   <div class="synth-result" id="synthResult"></div>
@@ -34,10 +34,12 @@
   <div class="wall" id="wall"></div>
 </main>
 <script>
+  const currentSalon = (function(){ try{ return (new URLSearchParams(location.search).get('salon') || 'general').toLowerCase(); }catch(e){ return 'general'; } })();
   function esc(s){ const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+  document.getElementById('salonBadge').textContent = '· Salón ' + currentSalon.toUpperCase();
   async function poll(){
     try{
-      const res = await fetch('/api/ideas');
+      const res = await fetch('/api/ideas?salon=' + encodeURIComponent(currentSalon));
       const data = await res.json();
       const ideas = data.ideas || [];
       document.getElementById('count').textContent = ideas.length + ' propuesta' + (ideas.length===1?'':'s');
@@ -51,7 +53,7 @@
     const btn = document.getElementById('synthBtn');
     btn.disabled = true; btn.textContent = '✨ Generando... (puede tardar unos segundos)';
     try{
-      const res = await fetch('/api/synthesis');
+      const res = await fetch('/api/synthesis?salon=' + encodeURIComponent(currentSalon));
       const data = await res.json();
       document.getElementById('synthResult').textContent = data.synthesis || 'No se recibió respuesta.';
       document.getElementById('synthResult').style.display = 'block';

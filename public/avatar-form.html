@@ -28,6 +28,7 @@
 <div class="wrap">
   <h1>🧑‍💻 Crea tu Avatar de Ingeniero</h1>
   <p class="sub">Describe cómo se ve un ingeniero(a) de sistemas del futuro.</p>
+  <p id="salonTag" style="font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--teal);margin:-10px 0 18px;"></p>
 
   <div id="formArea">
     <label>Tu nombre</label>
@@ -47,11 +48,18 @@
 </div>
 
 <script>
+  let currentSalon = 'general';
   try{
+    const params = new URLSearchParams(location.search);
+    const salonFromUrl = params.get('salon');
+    if (salonFromUrl) { localStorage.setItem('icesiSalon', salonFromUrl); }
+    currentSalon = (localStorage.getItem('icesiSalon') || 'general').toLowerCase();
     const savedName = localStorage.getItem('icesiPersonName');
     const savedTeam = localStorage.getItem('icesiTeam');
     if (savedName) document.getElementById('personName').value = savedName;
     if (savedTeam) document.getElementById('team').value = savedTeam;
+    const salonTag = document.getElementById('salonTag');
+    if (salonTag) salonTag.textContent = 'Salón: ' + currentSalon.toUpperCase();
   }catch(e){}
 
   const sendBtn = document.getElementById('sendBtn');
@@ -64,7 +72,7 @@
     err.textContent = '';
     sendBtn.disabled = true; sendBtn.textContent = 'Generando...';
     try{
-      const res = await fetch('/api/avatar', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name: personName, team, description }) });
+      const res = await fetch('/api/avatar', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name: personName, team, description, salon: currentSalon }) });
       const data = await res.json();
       if (!data.ok) throw new Error(data.error || 'Error');
       try{ localStorage.setItem('icesiPersonName', personName); localStorage.setItem('icesiTeam', team); }catch(e){}
