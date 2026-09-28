@@ -40,8 +40,10 @@ async function generateWithCloudflare(prompt) {
 // en vez de un error — nunca deja al presentador sin nada que proyectar.
 function fallbackSynthesis(ideas) {
   const count = ideas.length;
-  const pick = ideas[Math.floor(Math.random() * ideas.length)];
-  return `Recibimos ${count} propuesta${count === 1 ? '' : 's'} para resolver el caos de salida del colegio. Una que se destaca es la de ${pick.name}: "${pick.text}". Un ingeniero de sistemas real tomaría las mejores ideas de aquí, las combinaría y las probaría con datos reales antes de implementarlas a gran escala — eso es justamente lo que ustedes acaban de hacer entre todos.`;
+  // Sin IA no podemos "juzgar" calidad de verdad, así que usamos la propuesta más
+  // desarrollada (la más larga) como aproximación razonable a "la mejor idea".
+  const best = ideas.reduce((a, b) => (b.text.length > a.text.length ? b : a), ideas[0]);
+  return `Recibimos ${count} propuesta${count === 1 ? '' : 's'} para resolver el caos de salida del colegio. Entre todas se repiten ideas como turnos de salida, señalización y avisos por app.\n\n🏆 Mejor idea: ${best.name} — "${best.text}"\n\nUn ingeniero de sistemas real tomaría las mejores ideas de aquí, las combinaría y las probaría con datos reales antes de implementarlas a gran escala — eso es justamente lo que ustedes acaban de hacer entre todos.`;
 }
 
 export default async function handler(req, res) {
@@ -54,7 +56,15 @@ export default async function handler(req, res) {
       return;
     }
     const listado = ideas.map((it, i) => `${i + 1}. ${it.name}: ${it.text}`).join('\n');
-    const prompt = `Eres un ingeniero de sistemas senior hablando con estudiantes de colegio. Lee estas propuestas para resolver un problema de ingeniería (el caos a la salida de un colegio) y escribe en español, en máximo 120 palabras: 1) qué ideas o patrones se repiten más, 2) una propuesta particularmente creativa que destacarías por nombre, y 3) cómo un ingeniero de sistemas conectaría estas ideas en una solución real. Tono cercano, motivador, sin tecnicismos innecesarios.\n\nPropuestas:\n${listado}`;
+    const prompt = `Eres un ingeniero de sistemas senior hablando con estudiantes de colegio. Lee estas propuestas para resolver un problema de ingeniería (el caos a la salida de un colegio) y responde en español, en máximo 150 palabras, con esta estructura exacta:
+
+1. Un párrafo corto con la síntesis general: qué ideas o patrones se repiten más entre todas las propuestas, y cómo un ingeniero de sistemas conectaría esas ideas en una solución real.
+2. Una línea aparte que empiece exactamente con "🏆 Mejor idea:" seguida del nombre exacto del estudiante (tal como aparece en la lista) que propuso la idea más creativa o mejor pensada, y una frase breve explicando por qué la elegiste.
+
+Tono cercano, motivador, sin tecnicismos innecesarios. No inventes nombres que no estén en la lista.
+
+Propuestas:
+${listado}`;
 
     let synthesis;
     let generatedByAI = true;
