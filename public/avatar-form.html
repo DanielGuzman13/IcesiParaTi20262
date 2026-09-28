@@ -25,6 +25,15 @@
 </head>
 <body>
 <a href="/" style="position:fixed;top:14px;left:14px;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--muted);text-decoration:none;border:1px solid var(--card-border);padding:6px 10px;border-radius:8px;background:var(--card);z-index:50;">← Inicio</a>
+
+<div id="salonGate" style="display:none; position:fixed; inset:0; background:var(--bg); z-index:100; flex-direction:column; align-items:center; justify-content:center; gap:22px; text-align:center; padding:24px;">
+  <p style="font-family:'IBM Plex Mono',monospace; font-size:.78rem; color:var(--muted); letter-spacing:.08em; margin:0;">¿EN QUÉ SALÓN ESTÁS?</p>
+  <div style="display:flex; gap:16px; flex-wrap:wrap; justify-content:center;">
+    <button class="salon-btn" data-salon="202D" style="padding:22px 34px; border-radius:14px; border:1px solid var(--card-border); background:var(--card); color:var(--ink); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.25rem; cursor:pointer;">202D</button>
+    <button class="salon-btn" data-salon="205M" style="padding:22px 34px; border-radius:14px; border:1px solid var(--card-border); background:var(--card); color:var(--ink); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.25rem; cursor:pointer;">205M</button>
+  </div>
+</div>
+
 <div class="wrap">
   <h1>🧑‍💻 Crea tu Avatar de Ingeniero</h1>
   <p class="sub">Describe cómo se ve un ingeniero(a) de sistemas del futuro.</p>
@@ -48,18 +57,33 @@
 </div>
 
 <script>
-  let currentSalon = 'general';
+  function normSalonClient(v){ return (v||'').toString().trim().toLowerCase().replace(/[^a-z0-9]/g,'') || 'general'; }
+
+  let currentSalon = null;
+  try{ currentSalon = localStorage.getItem('icesiSalon'); }catch(e){}
+
+  function applySalon(s){
+    currentSalon = normSalonClient(s);
+    try{ localStorage.setItem('icesiSalon', currentSalon); }catch(e){}
+    document.getElementById('salonGate').style.display = 'none';
+    const salonTag = document.getElementById('salonTag');
+    if (salonTag) salonTag.textContent = 'Salón: ' + currentSalon.toUpperCase();
+  }
+
+  if (currentSalon) {
+    applySalon(currentSalon);
+  } else {
+    document.getElementById('salonGate').style.display = 'flex';
+  }
+  document.querySelectorAll('.salon-btn').forEach(btn => {
+    btn.addEventListener('click', () => applySalon(btn.dataset.salon));
+  });
+
   try{
-    const params = new URLSearchParams(location.search);
-    const salonFromUrl = params.get('salon');
-    if (salonFromUrl) { localStorage.setItem('icesiSalon', salonFromUrl); }
-    currentSalon = (localStorage.getItem('icesiSalon') || 'general').toLowerCase();
     const savedName = localStorage.getItem('icesiPersonName');
     const savedTeam = localStorage.getItem('icesiTeam');
     if (savedName) document.getElementById('personName').value = savedName;
     if (savedTeam) document.getElementById('team').value = savedTeam;
-    const salonTag = document.getElementById('salonTag');
-    if (salonTag) salonTag.textContent = 'Salón: ' + currentSalon.toUpperCase();
   }catch(e){}
 
   const sendBtn = document.getElementById('sendBtn');

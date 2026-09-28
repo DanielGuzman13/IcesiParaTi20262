@@ -31,10 +31,14 @@
   <div class="empty" id="empty">Esperando el primer avatar…</div>
   <div class="grid" id="grid"></div>
 </main>
+<script src="/salon.js"></script>
 <script>
-  const currentSalon = (function(){ try{ return (new URLSearchParams(location.search).get('salon') || 'general').toLowerCase(); }catch(e){ return 'general'; } })();
+  let currentSalon;
   function esc(s){ const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+  function startWhenReady(){
   document.getElementById('salonBadge').textContent = '· Salón ' + currentSalon.toUpperCase();
+  poll(); setInterval(poll, 8000);
+  }
   async function poll(){
     try{
       const res = await fetch('/api/avatar?salon=' + encodeURIComponent(currentSalon));
@@ -53,7 +57,7 @@
       document.getElementById('statusText').textContent = 'sin conexión...';
     }
   }
-  poll(); setInterval(poll, 8000);
+  IcesiSalon.requireFromUrl(function(code){ currentSalon = code; startWhenReady(); });
 </script>
 </body>
 </html>

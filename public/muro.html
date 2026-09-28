@@ -33,10 +33,14 @@
   <div class="empty" id="empty">Esperando las primeras propuestas…</div>
   <div class="wall" id="wall"></div>
 </main>
+<script src="/salon.js"></script>
 <script>
-  const currentSalon = (function(){ try{ return (new URLSearchParams(location.search).get('salon') || 'general').toLowerCase(); }catch(e){ return 'general'; } })();
+  let currentSalon;
   function esc(s){ const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+  function startWhenReady(){
   document.getElementById('salonBadge').textContent = '· Salón ' + currentSalon.toUpperCase();
+  poll(); setInterval(poll, 8000);
+  }
   async function poll(){
     try{
       const res = await fetch('/api/ideas?salon=' + encodeURIComponent(currentSalon));
@@ -47,7 +51,7 @@
       document.getElementById('wall').innerHTML = ideas.map(it => `<div class="note"><div class="team">${esc(it.name)}</div><div class="idea">${esc(it.text)}</div></div>`).join('');
     }catch(e){}
   }
-  poll(); setInterval(poll, 8000);
+  IcesiSalon.requireFromUrl(function(code){ currentSalon = code; startWhenReady(); });
 
   document.getElementById('synthBtn').addEventListener('click', async () => {
     const btn = document.getElementById('synthBtn');

@@ -6,49 +6,91 @@
 <title>Terminal de Rescate</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root{ --bg:#050a08; --card:#0a130f; --card-border:rgba(94,234,212,.22); --ink:#dffaf0; --muted:#6f9284; --teal:#5eead4; }
+  :root{ --bg:#050a08; --card:#0a130f; --card-border:rgba(94,234,212,.22); --ink:#dffaf0; --muted:#6f9284; --teal:#5eead4; --amber:#f2b544; }
   *{box-sizing:border-box;}
-  body{ margin:0; min-height:100vh; background:var(--bg); color:var(--ink); font-family:'IBM Plex Mono',monospace; display:flex; justify-content:center; padding:30px 18px 60px;}
-  .wrap{ width:100%; max-width:420px; }
+  body{ margin:0; min-height:100vh; background:var(--bg); color:var(--ink); font-family:'IBM Plex Mono',monospace; display:flex; justify-content:center; padding:30px 18px 60px; overflow-y:auto; -webkit-overflow-scrolling:touch;}
+  .wrap{ width:100%; max-width:440px; }
   h1{ font-family:'Space Grotesk',sans-serif; font-size:1.2rem; margin-bottom:6px;}
-  p.sub{ color:var(--muted); font-size:.85rem; line-height:1.5; margin:0 0 20px;}
-  label{ display:block; font-size:.7rem; color:var(--teal); margin:14px 0 6px;}
-  input{ width:100%; padding:10px 12px; border-radius:6px; background:var(--card); border:1px solid var(--card-border); color:var(--ink); font-family:inherit; font-size:.9rem;}
-  button{ margin-top:18px; width:100%; padding:13px; border-radius:8px; border:none; background:var(--teal); color:#03100c; font-weight:700; font-size:.9rem; cursor:pointer; font-family:'Space Grotesk',sans-serif;}
-  .result{ display:none; margin-top:20px; padding:18px; border-radius:10px; background:var(--card); border:1px solid var(--card-border); text-align:center;}
-  .err{ color:#f2705e; font-size:.8rem; margin-top:8px; min-height:1em;}
+  p.sub{ color:var(--muted); font-size:.85rem; line-height:1.5; margin:0 0 22px;}
+  .stage{ background:var(--card); border:1px solid var(--card-border); border-radius:14px; padding:18px 18px 20px; margin-bottom:16px; }
+  .stage.voted{ border-color: rgba(94,234,212,.55); }
+  .stage .label{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.05rem; color:var(--teal); margin:0 0 4px; }
+  .stage .hint{ color:var(--muted); font-size:.78rem; margin:0 0 14px; }
+  .opts{ display:flex; gap:10px; }
+  .opts button{ flex:1; padding:14px 0; border-radius:10px; border:1px solid var(--card-border); background:#0f1c17; color:var(--ink); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.05rem; cursor:pointer; }
+  .opts button:active{ transform: scale(.97); }
+  .opts button:disabled{ opacity:.5; cursor:not-allowed; }
+  .stage.voted .opts button{ opacity:.4; }
+  .stage.voted .opts button.chosen{ opacity:1; background:var(--teal); color:#03100c; border-color:var(--teal); }
+  .voted-tag{ display:none; font-size:.75rem; color:var(--teal); margin-top:10px; }
+  .stage.voted .voted-tag{ display:block; }
+  .err{ color:#f2705e; font-size:.8rem; margin-top:6px; min-height:1em;}
 </style>
 </head>
 <body>
 <a href="/" style="position:fixed;top:14px;left:14px;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--muted);text-decoration:none;border:1px solid var(--card-border);padding:6px 10px;border-radius:8px;background:var(--card);z-index:50;">← Inicio</a>
 <div class="wrap">
   <h1>📡 Terminal de Rescate</h1>
-  <p class="sub">Escribe el número de etapa que está en pantalla y la letra del comando que tu equipo quiere ejecutar.</p>
-  <div id="formArea">
-    <label>Etapa</label>
-    <input id="etapa" type="text" placeholder="Ej: 1">
-    <label>Opción</label>
-    <input id="opcion" type="text" placeholder="Escribe A, B o C">
-    <button id="sendBtn">Votar comando</button>
-    <div class="err" id="err"></div>
-  </div>
-  <div class="result" id="result">Voto registrado 📡</div>
+  <p class="sub">Vota el comando de tu equipo en cada etapa. Un voto por etapa — cuando el presentador avance a la siguiente, baja y vota ahí.</p>
+  <div id="stages"></div>
 </div>
 <script>
   const currentSalon = (function(){ try{ const p = new URLSearchParams(location.search).get('salon'); if (p) localStorage.setItem('icesiSalon', p); return (localStorage.getItem('icesiSalon') || 'general').toLowerCase(); }catch(e){ return 'general'; } })();
-  document.getElementById('sendBtn').addEventListener('click', async () => {
-    const etapa = document.getElementById('etapa').value.trim();
-    const opcion = document.getElementById('opcion').value.trim();
-    const err = document.getElementById('err');
-    if (!etapa || !opcion){ err.textContent = 'Completa los dos campos.'; return; }
-    err.textContent = '';
+
+  function getVoted(){ try{ return JSON.parse(localStorage.getItem('icesiTerminalVotes') || '{}'); }catch(e){ return {}; } }
+  function setVoted(etapa, opcion){
     try{
-      const res = await fetch('/api/terminal', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ etapa, opcion, salon: currentSalon }) });
-      const data = await res.json();
-      if (!data.ok) throw new Error();
-      document.getElementById('formArea').style.display='none';
-      document.getElementById('result').style.display='block';
-    }catch(e){ err.textContent = 'No se pudo enviar. Intenta de nuevo.'; }
+      const v = getVoted();
+      v[etapa] = opcion;
+      localStorage.setItem('icesiTerminalVotes', JSON.stringify(v));
+    }catch(e){}
+  }
+
+  const container = document.getElementById('stages');
+  const voted = getVoted();
+
+  [1, 2, 3, 4].forEach((etapaNum) => {
+    const etapa = String(etapaNum);
+    const already = voted[etapa];
+
+    const stage = document.createElement('div');
+    stage.className = 'stage' + (already ? ' voted' : '');
+    stage.innerHTML = `
+      <p class="label">Voto Etapa ${etapaNum}</p>
+      <p class="hint">Elige el comando que tu equipo quiere ejecutar.</p>
+      <div class="opts">
+        <button data-opt="A" ${already ? 'disabled' : ''} class="${already === 'A' ? 'chosen' : ''}">A</button>
+        <button data-opt="B" ${already ? 'disabled' : ''} class="${already === 'B' ? 'chosen' : ''}">B</button>
+        <button data-opt="C" ${already ? 'disabled' : ''} class="${already === 'C' ? 'chosen' : ''}">C</button>
+      </div>
+      <p class="voted-tag">Voto registrado 📡 — opción ${already || ''}</p>
+      <p class="err"></p>
+    `;
+    container.appendChild(stage);
+
+    stage.querySelectorAll('.opts button').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const opcion = btn.getAttribute('data-opt');
+        const errEl = stage.querySelector('.err');
+        errEl.textContent = '';
+        stage.querySelectorAll('.opts button').forEach((b) => (b.disabled = true));
+        try{
+          const res = await fetch('/api/terminal', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ etapa, opcion, salon: currentSalon }),
+          });
+          const data = await res.json();
+          if (!data.ok) throw new Error();
+          setVoted(etapa, opcion);
+          stage.classList.add('voted');
+          btn.classList.add('chosen');
+        } catch (e) {
+          errEl.textContent = 'No se pudo enviar. Intenta de nuevo.';
+          stage.querySelectorAll('.opts button').forEach((b) => (b.disabled = false));
+        }
+      });
+    });
   });
 </script>
 </body>

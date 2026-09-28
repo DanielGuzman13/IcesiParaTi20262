@@ -31,10 +31,14 @@
   <div class="empty" id="empty">Sin votos todavía…</div>
   <div id="bars"></div>
 </main>
+<script src="/salon.js"></script>
 <script>
-  const currentSalon = (function(){ try{ return (new URLSearchParams(location.search).get('salon') || 'general').toLowerCase(); }catch(e){ return 'general'; } })();
+  let currentSalon;
   function esc(s){ const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+  function startWhenReady(){
   document.getElementById('salonBadge').textContent = '· Salón ' + currentSalon.toUpperCase();
+  poll(); setInterval(poll, 8000);
+  }
   async function poll(){
     const etapa = document.getElementById('etapa').value.trim();
     if (!etapa) return;
@@ -53,7 +57,7 @@
         </div>`).join('');
     }catch(e){}
   }
-  poll(); setInterval(poll, 8000);
+  IcesiSalon.requireFromUrl(function(code){ currentSalon = code; startWhenReady(); });
   document.getElementById('etapa').addEventListener('change', poll);
 </script>
 </body>

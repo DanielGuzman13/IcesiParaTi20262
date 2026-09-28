@@ -42,21 +42,20 @@
   <a class="card" href="/muro.html"><div class="t">📌 Muro de Ideas + Síntesis IA</div><div class="d">/muro.html</div></a>
 </div>
 
+<script src="/salon.js"></script>
 <script>
   (function(){
-    try{
-      const params = new URLSearchParams(location.search);
-      const salon = params.get('salon');
-      if (salon) {
-        document.querySelectorAll('a.card').forEach(a => {
-          const url = new URL(a.getAttribute('href'), location.href);
-          url.searchParams.set('salon', salon);
-          a.setAttribute('href', url.pathname + url.search);
-        });
-        const sub = document.querySelector('p.sub');
-        if (sub) sub.textContent = 'Menú de actividades · Salón ' + salon.toUpperCase();
-      }
-    }catch(e){}
+    document.querySelector('.grid').style.display = 'none';
+    IcesiSalon.getOrPick(function(salon){
+      document.querySelectorAll('a.card').forEach(a => {
+        const url = new URL(a.getAttribute('href'), location.href);
+        url.searchParams.set('salon', salon);
+        a.setAttribute('href', url.pathname + url.search);
+      });
+      const sub = document.querySelector('p.sub');
+      if (sub) sub.textContent = 'Menú de actividades · Salón ' + salon.toUpperCase();
+      document.querySelector('.grid').style.display = '';
+    });
   })();
 </script>
 </body>
