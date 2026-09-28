@@ -28,7 +28,11 @@
 <a href="/" style="position:fixed;top:14px;left:14px;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--muted);text-decoration:none;border:1px solid var(--card-border);padding:6px 10px;border-radius:8px;background:var(--card);z-index:50;">← Inicio</a>
 <header><h1>Muro de Ideas — Reto Arquitecto <span id="salonBadge" style="font-size:.8rem; color:var(--muted); font-family:'IBM Plex Mono',monospace;"></span></h1><span id="count" style="font-family:'IBM Plex Mono',monospace;color:var(--muted);font-size:.8rem;">0 propuestas</span></header>
 <main>
+  <div style="display:flex; gap:8px; margin-bottom:10px;">
+    <input id="synthPassword" type="password" placeholder="Contraseña del organizador" style="flex:1; padding:12px 14px; border-radius:10px; background:var(--card); border:1px solid var(--card-border); color:var(--ink); font-family:inherit; font-size:.85rem;">
+  </div>
   <button class="synth-btn" id="synthBtn">✨ Generar síntesis con IA</button>
+  <p id="synthErr" style="color:#f2705e; font-size:.8rem; margin:8px 0 0; min-height:1em;"></p>
   <div class="synth-result" id="synthResult"></div>
   <div class="empty" id="empty">Esperando las primeras propuestas…</div>
   <div class="wall" id="wall"></div>
@@ -53,17 +57,31 @@
   }
   IcesiSalon.requireFromUrl(function(code){ currentSalon = code; startWhenReady(); });
 
+  try{
+    const savedPw = sessionStorage.getItem('icesiSynthPw');
+    if (savedPw) document.getElementById('synthPassword').value = savedPw;
+  }catch(e){}
+
   document.getElementById('synthBtn').addEventListener('click', async () => {
     const btn = document.getElementById('synthBtn');
+    const errEl = document.getElementById('synthErr');
+    const password = document.getElementById('synthPassword').value.trim();
+    errEl.textContent = '';
+    if (!password){ errEl.textContent = 'Ingresa la contraseña del organizador.'; return; }
     btn.disabled = true; btn.textContent = '✨ Generando... (puede tardar unos segundos)';
     try{
-      const res = await fetch('/api/synthesis?salon=' + encodeURIComponent(currentSalon));
+      const res = await fetch('/api/synthesis?salon=' + encodeURIComponent(currentSalon) + '&password=' + encodeURIComponent(password));
+      if (res.status === 401){
+        errEl.textContent = 'Contraseña incorrecta.';
+        btn.disabled = false; btn.textContent = '✨ Generar síntesis con IA';
+        return;
+      }
       const data = await res.json();
+      try{ sessionStorage.setItem('icesiSynthPw', password); }catch(e){}
       document.getElementById('synthResult').textContent = data.synthesis || 'No se recibió respuesta.';
       document.getElementById('synthResult').style.display = 'block';
     }catch(e){
-      document.getElementById('synthResult').textContent = 'No se pudo conectar con la IA.';
-      document.getElementById('synthResult').style.display = 'block';
+      errEl.textContent = 'No se pudo conectar con la IA.';
     }
     btn.disabled = false; btn.textContent = '✨ Generar síntesis con IA';
   });

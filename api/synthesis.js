@@ -3,6 +3,7 @@ import { kvLRange } from '../lib/kv.js';
 const CF_ACCOUNT_ID = process.env.CF_ACCOUNT_ID;
 const CF_API_TOKEN = process.env.CF_API_TOKEN;
 const CF_TEXT_MODEL = '@cf/meta/llama-3.1-8b-instruct';
+const SYNTH_PASSWORD = process.env.SYNTH_PASSWORD || 'rescate2026';
 
 function normSalon(s) {
   const v = (s || '').toString().trim().toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -50,6 +51,11 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   try {
     const salon = normSalon(req.query && req.query.salon);
+    const password = ((req.query && req.query.password) || '').toString();
+    if (password !== SYNTH_PASSWORD) {
+      res.status(401).json({ error: 'Contraseña incorrecta' });
+      return;
+    }
     const ideas = await kvLRange('ideas:list:' + salon, 0, 39);
     if (!ideas.length) {
       res.status(200).json({ synthesis: 'Todavía no hay propuestas para sintetizar.' });
