@@ -48,7 +48,7 @@
       document.getElementById('empty').style.display = subs.length ? 'none' : 'block';
       document.getElementById('grid').innerHTML = subs.map(s => `
         <div class="card"><img src="${s.imageUrl}" loading="lazy">
-        <div class="meta"><div class="team">${esc(s.name)} <span style="color:var(--muted);font-weight:400;">· ${esc(s.team)}</span></div><div class="desc">${esc(s.description)}</div></div></div>
+        <div class="meta"><div class="team">${esc(s.name)}</div><div class="desc">${esc(s.description)}</div></div></div>
       `).join('');
       document.getElementById('dot').classList.remove('stale');
       document.getElementById('statusText').textContent = 'en vivo';

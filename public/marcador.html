@@ -62,7 +62,6 @@
           ${p.avatarUrl ? `<img class="avatar" src="${p.avatarUrl}">` : `<div class="avatar placeholder">🙂</div>`}
           <div>
             <div class="name">${esc(p.name)}</div>
-            ${p.team ? `<div class="team">${esc(p.team)}</div>` : ''}
             <div class="rounds">${chip('R1',p.r1)}${chip('R2',p.r2)}${chip('R3',p.r3)}${chip('Bonus',p.bonus)}${chip('Pipeline',p.pipeline)}${chip('EcoRuta',p.ecoruta)}</div>
           </div>
           <div class="score">${p.total} pts</div>

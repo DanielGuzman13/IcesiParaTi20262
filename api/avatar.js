@@ -66,7 +66,6 @@ export default async function handler(req, res) {
     if (req.method === 'POST') {
       const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
       const name = (body.name || '').toString().trim().slice(0, 40);
-      const team = (body.team || 'Equipo sin nombre').toString().trim().slice(0, 40);
       const description = (body.description || 'un ingeniero de sistemas futurista').toString().trim().slice(0, 200);
       const salon = normSalon(body.salon);
 
@@ -84,14 +83,13 @@ export default async function handler(req, res) {
       }
 
       // Gallery entry (for the projector wall), scoped per salón
-      const entry = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name, team, description, imageUrl, salon, generatedByAI, createdAt: new Date().toISOString() };
+      const entry = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name, description, imageUrl, salon, generatedByAI, createdAt: new Date().toISOString() };
       await kvLPush('avatar:list:' + salon, entry);
       await kvLTrim('avatar:list:' + salon, 0, 199);
 
       // Person record — a Redis HASH (atomic per-field writes, no read/modify/write races).
       const personKey = 'person:' + slug(name);
       await kvHSet(personKey, 'name', name);
-      await kvHSet(personKey, 'team', team);
       await kvHSet(personKey, 'avatarUrl', imageUrl);
       await kvHSet(personKey, 'salon', salon);
       await kvSAdd('people:index:' + salon, personKey);

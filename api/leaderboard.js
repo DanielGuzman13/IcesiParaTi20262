@@ -19,7 +19,6 @@ export default async function handler(req, res) {
       const total = r1 + r2 + r3 + bonus + pipeline + ecoruta;
       people.push({
         name: p.name,
-        team: p.team || '',
         avatarUrl: p.avatarUrl || null,
         r1, r2, r3, bonus, pipeline, ecoruta,
         total,
